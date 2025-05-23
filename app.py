@@ -63,17 +63,23 @@ def save_recorded_audio():
 
 def transcribe_and_send():
     """Transcribe recorded audio and automatically send as message."""
+    st.write(f"🔍 Debug: Audio buffer length: {len(st.session_state.audio_buffer)}")
+    
     if not st.session_state.audio_buffer:
-        st.warning("No audio recorded.")
+        st.warning("No audio recorded. Make sure to click START first, then Record.")
         return
     
     with st.spinner("🎯 Processing your message..."):
         try:
+            st.write("🔍 Debug: Starting audio processing...")
+            
             # Save audio to file
             audio_file_path = save_recorded_audio()
+            st.write(f"🔍 Debug: Audio file created: {audio_file_path is not None}")
             
             if audio_file_path:
                 # Transcribe using OpenAI Whisper
+                st.write("🔍 Debug: Sending to OpenAI Whisper...")
                 with open(audio_file_path, "rb") as audio_file:
                     transcript = openai.audio.transcriptions.create(
                         model="whisper-1",
@@ -85,6 +91,8 @@ def transcribe_and_send():
                 os.unlink(audio_file_path)
                 
                 transcribed_text = transcript.strip()
+                st.write(f"🔍 Debug: Transcribed text: '{transcribed_text}'")
+                
                 if transcribed_text:
                     # Automatically send the transcribed message
                     process_user_message(transcribed_text)
@@ -99,6 +107,8 @@ def transcribe_and_send():
                 
         except Exception as e:
             st.error(f"Transcription failed: {str(e)}")
+            import traceback
+            st.code(traceback.format_exc())
 
 def process_user_message(prompt):
     """Process a user message through the OpenAI Assistant."""
