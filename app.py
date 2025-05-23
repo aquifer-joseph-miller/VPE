@@ -81,3 +81,44 @@ if prompt := st.chat_input("Say something to the actor..."):
     latest = messages.data[0].content[0].text.value
     st.session_state.messages.append({"role": "assistant", "content": latest})
     st.chat_message("assistant").markdown(latest)
+
+if st.button("Get Feedback on This Interaction"):
+    transcript = get_transcript_as_text(st.session_state.thread_id)
+
+    # Create new thread for feedback
+    feedback_thread = openai.beta.threads.create()
+
+    openai.beta.threads.messages.create(
+        thread_id=feedback_thread.id,
+        role="user",
+        content=f"Here is the transcript of a student interacting with a virtual patient. Please provide constructive feedback:\n\n{transcript}"
+    )
+
+    feedback_run = openai.beta.threads.runs.create(
+        thread_id=feedback_thread.id,
+        assistant_id=ASSISTANT_MAP["Mr. Aiken Feedback"],
+    )
+
+    with st.spinner("Generating feedback..."):
+        while True:
+            feedback_status = openai.beta.threads.runs.retrieve(
+                thread_id=feedback_thread.id,
+                run_id=feedback_run.id
+            )
+            if feedback_status.status == "completed":
+                break
+
+    feedback_messages = openai.beta.threads.messages.list(thread_id=feedback_thread.id)
+    feedback_text = feedback_messages.data[0].content[0].text.value
+
+    st.subheader("🧑‍🏫 Feedback from Coach")
+    st.markdown(feedback_text)
+
+def get_transcript_as_text(thread_id):
+    messages = openai.beta.threads.messages.list(thread_id=thread_id)
+    transcript = ""
+    for msg in reversed(messages.data):  # to keep chronological order
+        role = msg.role.capitalize()
+        content = msg.content[0].text.value
+        transcript += f"{role}: {content}\n\n"
+    return transcript
