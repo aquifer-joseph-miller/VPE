@@ -35,14 +35,9 @@ if "thread_id" not in st.session_state:
     thread = openai.beta.threads.create()
     st.session_state.thread_id = thread.id
 
-# Display prior chat messages inside a styled container
-with st.container():
-    st.markdown('<div class="stChat">', unsafe_allow_html=True)
-
-    for msg in st.session_state.messages:
-        st.chat_message(msg["role"]).markdown(msg["content"])
-
-    st.markdown('</div>', unsafe_allow_html=True)
+# Display prior chat messages
+for msg in st.session_state.messages:
+    st.chat_message(msg["role"]).markdown(msg["content"])
 
 # Chat input
 if prompt := st.chat_input("Start chatting with the virtual patient..."):
