@@ -22,47 +22,6 @@ def get_transcript_as_text(thread_id):
 # Secure API key handling
 openai.api_key = st.secrets["OPENAI_API_KEY"]
 
-# Custom CSS styling
-st.markdown(
-    """
-    <style>
-    /* Set the overall app background */
-    .stApp {
-        background-color: rgba(27, 85, 153, 0.6); /* #1B5599 with 60% opacity */
-        color: white;
-        font-family: 'Roboto', sans-serif;
-    }
-
-    /* Use Roboto Condensed for headings */
-    @import url('https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@700&display=swap');
-    h1, h2, h3, h4, h5, h6, .st-emotion-cache-10trblm {
-        font-family: 'Roboto Condensed', sans-serif;
-        color: white;
-    }
-
-    /* Center and contain the chat within a styled box */
-    .stChat {
-        background-color: rgba(255, 255, 255, 0.05);
-        border-radius: 12px;
-        padding: 20px;
-        margin: auto;
-        max-width: 800px;
-    }
-
-    /* White chat input text */
-    .stTextInput > div > div > input {
-        color: white;
-    }
-
-    /* Ensure paragraphs are also white */
-    .st-emotion-cache-16idsys p {
-        color: white;
-    }
-    </style>
-    """,
-    unsafe_allow_html=True
-)
-
 st.title("Virtual Patient Encounters (VPE)")
 
 # Sidebar: Select Actor
