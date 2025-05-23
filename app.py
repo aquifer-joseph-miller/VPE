@@ -73,11 +73,16 @@ if prompt := st.chat_input("Say something to the actor..."):
     st.chat_message("assistant").markdown(latest)
 
 # ✅ Only show button if there's a user message in the history
-if st.session_state.messages and any(msg["role"] == "user" for msg in st.session_state.messages):
+# Count how many user messages exist
+user_message_count = sum(1 for msg in st.session_state.messages if msg["role"] == "user")
+
+if user_message_count >= 5:
     st.markdown("---")
     st.subheader("🧠 Ready to reflect?")
-
+    
     if st.button("Get Feedback on This Interaction"):
+        # ... your feedback logic ...
+
         transcript = get_transcript_as_text(st.session_state.thread_id)
 
         # Create new thread for feedback
