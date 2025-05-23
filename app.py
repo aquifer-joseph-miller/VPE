@@ -7,8 +7,6 @@ import tempfile
 import os
 import wave
 import numpy as np
-import threading
-import time
 
 # ✅ Keep this helper function unchanged
 def get_transcript_as_text(thread_id):
@@ -30,13 +28,12 @@ if "audio_buffer" not in st.session_state:
     st.session_state.audio_buffer = []
 if "is_recording" not in st.session_state:
     st.session_state.is_recording = False
-if "audio_recorded" not in st.session_state:
-    st.session_state.audio_recorded = False
+if "input_mode" not in st.session_state:
+    st.session_state.input_mode = "text"  # "text" or "voice"
 
 def audio_frame_callback(frame):
     """Callback to capture audio frames during recording."""
     if st.session_state.is_recording:
-        # Convert frame to numpy array and store
         audio_array = frame.to_ndarray()
         st.session_state.audio_buffer.append(audio_array.flatten())
     return frame
@@ -47,20 +44,16 @@ def save_recorded_audio():
         return None
     
     try:
-        # Concatenate all audio frames
         audio_data = np.concatenate(st.session_state.audio_buffer)
-        
-        # Normalize audio (convert to 16-bit PCM)
         if np.max(np.abs(audio_data)) > 0:
             audio_data = audio_data / np.max(np.abs(audio_data))
         audio_data = (audio_data * 32767).astype(np.int16)
         
-        # Create temporary WAV file
         temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".wav")
         with wave.open(temp_file.name, 'wb') as wav_file:
-            wav_file.setnchannels(1)  # Mono
-            wav_file.setsampwidth(2)  # 16-bit
-            wav_file.setframerate(48000)  # 48kHz
+            wav_file.setnchannels(1)
+            wav_file.setsampwidth(2)
+            wav_file.setframerate(48000)
             wav_file.writeframes(audio_data.tobytes())
         
         return temp_file.name
@@ -68,18 +61,44 @@ def save_recorded_audio():
         st.error(f"Error processing audio: {e}")
         return None
 
-def transcribe_audio_file(file_path):
-    """Transcribe audio file using OpenAI Whisper."""
-    try:
-        with open(file_path, "rb") as audio_file:
-            transcript = openai.audio.transcriptions.create(
-                model="whisper-1",
-                file=audio_file,
-                response_format="text"
-            )
-        return transcript.strip()
-    except Exception as e:
-        raise e
+def transcribe_and_send():
+    """Transcribe recorded audio and automatically send as message."""
+    if not st.session_state.audio_buffer:
+        st.warning("No audio recorded.")
+        return
+    
+    with st.spinner("🎯 Processing your message..."):
+        try:
+            # Save audio to file
+            audio_file_path = save_recorded_audio()
+            
+            if audio_file_path:
+                # Transcribe using OpenAI Whisper
+                with open(audio_file_path, "rb") as audio_file:
+                    transcript = openai.audio.transcriptions.create(
+                        model="whisper-1",
+                        file=audio_file,
+                        response_format="text"
+                    )
+                
+                # Clean up temp file
+                os.unlink(audio_file_path)
+                
+                transcribed_text = transcript.strip()
+                if transcribed_text:
+                    # Automatically send the transcribed message
+                    process_user_message(transcribed_text)
+                    
+                    # Reset recording state
+                    st.session_state.audio_buffer = []
+                    st.session_state.is_recording = False
+                else:
+                    st.warning("No speech detected. Please try again.")
+            else:
+                st.error("Could not process recording.")
+                
+        except Exception as e:
+            st.error(f"Transcription failed: {str(e)}")
 
 def process_user_message(prompt):
     """Process a user message through the OpenAI Assistant."""
@@ -133,123 +152,77 @@ if "thread_id" not in st.session_state:
 for msg in st.session_state.messages:
     st.chat_message(msg["role"]).markdown(msg["content"])
 
-# Chat input section
-st.markdown("### 💬 Send a message")
-
-# Text input
-if prompt := st.chat_input("Type your message or use voice recording below..."):
-    process_user_message(prompt)
-
-# Voice recording section
-st.markdown("### 🎤 Voice Recording")
-
-# WebRTC streamer for audio capture
-webrtc_ctx = webrtc_streamer(
-    key="audio-recorder",
-    mode=WebRtcMode.SENDONLY,
-    audio_receiver_size=1024,
-    media_stream_constraints={
-        "video": False,
-        "audio": {
-            "echoCancellation": True,
-            "noiseSuppression": True,
-            "autoGainControl": True,
-            "sampleRate": 48000,
-        }
-    },
-    audio_frame_callback=audio_frame_callback,
-    rtc_configuration=RTCConfiguration(
-        {"iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]}
-    ),
-)
-
-# Recording controls
-col1, col2, col3 = st.columns([1, 1, 2])
+# Input mode selection
+st.markdown("### 💬 Choose input method:")
+col1, col2 = st.columns(2)
 
 with col1:
-    if st.button("🔴 Start Recording", disabled=st.session_state.is_recording):
-        if webrtc_ctx.state.playing:
-            st.session_state.is_recording = True
-            st.session_state.audio_buffer = []
-            st.session_state.audio_recorded = False
-            st.rerun()
-        else:
-            st.error("Please allow microphone access first by clicking the play button above.")
-
-with col2:
-    if st.button("⏹️ Stop Recording", disabled=not st.session_state.is_recording):
-        st.session_state.is_recording = False
-        st.session_state.audio_recorded = True
+    if st.button("💬 Text Chat", use_container_width=True, 
+                 type="primary" if st.session_state.input_mode == "text" else "secondary"):
+        st.session_state.input_mode = "text"
         st.rerun()
 
-with col3:
-    if st.session_state.is_recording:
-        st.error("🔴 Recording... Click 'Stop Recording' when finished")
-    elif st.session_state.audio_recorded and st.session_state.audio_buffer:
-        st.success("✅ Audio recorded! Click 'Transcribe & Send' below")
-    elif webrtc_ctx.state.playing:
-        st.info("🎤 Ready to record. Click 'Start Recording'")
-    else:
-        st.warning("⚠️ Click the play button above to enable microphone")
+with col2:
+    if st.button("🎤 Voice Chat", use_container_width=True,
+                 type="primary" if st.session_state.input_mode == "voice" else "secondary"):
+        st.session_state.input_mode = "voice"
+        st.rerun()
 
-# Transcription button
-if st.session_state.audio_recorded and st.session_state.audio_buffer:
-    if st.button("🎯 Transcribe & Send Message"):
-        with st.spinner("🎯 Transcribing your message..."):
-            try:
-                # Save recorded audio to file
-                audio_file_path = save_recorded_audio()
-                
-                if audio_file_path:
-                    # Transcribe the audio
-                    transcribed_text = transcribe_audio_file(audio_file_path)
-                    
-                    # Clean up the temporary file
-                    os.unlink(audio_file_path)
-                    
-                    if transcribed_text:
-                        st.success(f"🎙️ **Transcribed:** *{transcribed_text}*")
-                        
-                        # Process the message
-                        process_user_message(transcribed_text)
-                        
-                        # Reset recording state
-                        st.session_state.audio_buffer = []
-                        st.session_state.audio_recorded = False
-                        st.rerun()
-                    else:
-                        st.warning("⚠️ No speech detected. Please try recording again.")
-                else:
-                    st.error("❌ Could not process the recording. Please try again.")
-                    
-            except Exception as e:
-                st.error(f"❌ Transcription failed: {str(e)}")
-                st.info("💡 **Tips for better recording:**\n"
-                       "• Speak clearly and loudly\n"
-                       "• Ensure quiet environment\n"
-                       "• Record for at least 2-3 seconds\n"
-                       "• Check your microphone permissions")
-
-# Instructions
-with st.expander("ℹ️ How to use voice recording"):
-    st.markdown("""
-    **Step-by-step:**
+# Show current mode
+if st.session_state.input_mode == "text":
+    st.info("📝 **Text Chat Mode** - Type your message below")
     
-    1. **Enable microphone** - Click the ▶️ play button in the WebRTC box above
-    2. **Allow permissions** - Your browser will ask for microphone access
-    3. **Start recording** - Click the 🔴 "Start Recording" button
-    4. **Speak your message** - Talk clearly into your microphone
-    5. **Stop recording** - Click ⏹️ "Stop Recording" when finished
-    6. **Send message** - Click 🎯 "Transcribe & Send Message"
-    
-    **Tips:**
-    - Speak in a quiet environment
-    - Hold the microphone close to your mouth
-    - Speak clearly and at normal pace
-    - Wait a moment after clicking start before speaking
-    """)
+    # Text input
+    if prompt := st.chat_input("Say something to the actor..."):
+        process_user_message(prompt)
 
-# ✅ Only show button if there's a user message in the history
+else:  # voice mode
+    st.info("🎙️ **Voice Chat Mode** - Record your message")
+    
+    # WebRTC for voice input (only show in voice mode)
+    webrtc_ctx = webrtc_streamer(
+        key="voice-recorder",
+        mode=WebRtcMode.SENDONLY,
+        audio_receiver_size=1024,
+        media_stream_constraints={
+            "video": False,
+            "audio": {
+                "echoCancellation": True,
+                "noiseSuppression": True,
+                "autoGainControl": True,
+            }
+        },
+        audio_frame_callback=audio_frame_callback,
+        rtc_configuration=RTCConfiguration(
+            {"iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]}
+        ),
+    )
+    
+    # Voice recording controls
+    col1, col2, col3 = st.columns([1, 1, 2])
+    
+    with col1:
+        if st.button("🔴 Record", disabled=st.session_state.is_recording or not webrtc_ctx.state.playing):
+            st.session_state.is_recording = True
+            st.session_state.audio_buffer = []
+            st.rerun()
+    
+    with col2:
+        if st.button("⏹️ Stop", disabled=not st.session_state.is_recording):
+            st.session_state.is_recording = False
+            # Automatically transcribe and send when stopping
+            transcribe_and_send()
+            st.rerun()
+    
+    with col3:
+        if not webrtc_ctx.state.playing:
+            st.warning("⚠️ Click ▶️ above to enable microphone")
+        elif st.session_state.is_recording:
+            st.error("🔴 Recording... Click 'Stop' when finished")
+        else:
+            st.success("✅ Ready to record")
+
+# ✅ Only show feedback button if there's a user message in the history
 user_message_count = sum(1 for msg in st.session_state.messages if msg["role"] == "user")
 
 if user_message_count >= 5:
