@@ -86,7 +86,14 @@ if st.session_state.messages and any(msg["role"] == "user" for msg in st.session
         openai.beta.threads.messages.create(
             thread_id=feedback_thread.id,
             role="user",
-            content=f"Here is the transcript of a student interacting with a virtual patient. Please provide constructive feedback:\n\n{transcript}"
+            content=f"""
+Below is a transcript of a simulated patient encounter. The STUDENT is a medical learner. The PATIENT is Mr. Aiken, a virtual patient powered by AI.
+
+Please provide constructive feedback **only on the STUDENT’s performance**, including their tone, communication style, question quality, and clinical reasoning. Do not critique the patient responses.
+
+Transcript:
+{transcript}
+"""
         )
 
         feedback_run = openai.beta.threads.runs.create(
@@ -106,12 +113,12 @@ if st.session_state.messages and any(msg["role"] == "user" for msg in st.session
         feedback_messages = openai.beta.threads.messages.list(thread_id=feedback_thread.id)
         feedback_text = feedback_messages.data[0].content[0].text.value
 
-# Show Feedback Coach icon next to the heading
-col1, col2 = st.columns([1, 8])
-with col1:
-    st.image("https://drive.google.com/uc?id=1FOLTw9RLgJLe8jCnBnbYFVWi2m6dUL7Z", width=40)
-with col2:
-    st.subheader("Feedback from Coach")
+        # 🎨 Feedback icon + title
+        col1, col2 = st.columns([1, 8])
+        with col1:
+            st.image("https://drive.google.com/uc?id=1FOLTw9RLgJLe8jCnBnbYFVWi2m6dUL7Z", width=40)
+        with col2:
+            st.subheader("Feedback from Coach")
 
-# Feedback content
-st.markdown(feedback_text)
+        # 📝 Feedback content
+        st.markdown(feedback_text)
