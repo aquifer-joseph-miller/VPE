@@ -5,7 +5,29 @@ from assistants import ASSISTANT_MAP
 # ✅ Secure version: API key from secrets (no hardcoding)
 openai.api_key = st.secrets["OPENAI_API_KEY"]
 
+# Custom CSS styling
+st.markdown(
+    """
+    <style>
+    .stApp {
+        background-color: rgba(27, 85, 153, 0.6); /* #1B5599 with 60% opacity */
+        color: white;
+    }
+    h1, h2, h3, h4, h5, h6, .st-emotion-cache-10trblm {
+        color: white; /* Ensure title and headings are white */
+    }
+    .st-emotion-cache-16idsys p {
+        color: white; /* Ensure chat messages are white */
+    }
+    .stTextInput > div > div > input {
+        color: white; /* Input text color */
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
 
+# Your existing app code continues below
 st.title("Virtual Patient Actors (VPE)")
 
 # Sidebar: Select Actor
