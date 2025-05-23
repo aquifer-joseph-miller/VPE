@@ -2,35 +2,18 @@ import streamlit as st
 import openai
 from assistants import ASSISTANT_MAP
 
+# ✅ Keep this helper function unchanged
+def get_transcript_as_text(thread_id):
+    messages = openai.beta.threads.messages.list(thread_id=thread_id)
+    transcript = ""
+    for msg in reversed(messages.data):  # to keep chronological order
+        role = msg.role.capitalize()
+        content = msg.content[0].text.value
+        transcript += f"{role}: {content}\n\n"
+    return transcript
+
 # Secure API key handling
 openai.api_key = st.secrets["OPENAI_API_KEY"]
-
-# 🔥 Custom CSS to set background color and text
-st.markdown(
-    """
-    <style>
-    .stApp {
-        background-color: rgba(27, 85, 153, 0.6) !important;
-    }
-    h1, h2, h3, h4, h5, h6, p, label, div, span {
-        color: white !important;
-    }
-    .st-emotion-cache-6qob1r {
-        background-color: rgba(27, 85, 153, 0.8) !important;
-    }
-    .stChatMessage {
-        color: white !important;
-    }
-    input {
-        color: white !important;
-    }
-    .st-emotion-cache-16txtl3, .st-emotion-cache-1pahdxg {
-        color: white !important;
-    }
-    </style>
-    """,
-    unsafe_allow_html=True
-)
 
 st.title("Virtual Patient Actors (VPE)")
 
@@ -82,43 +65,39 @@ if prompt := st.chat_input("Say something to the actor..."):
     st.session_state.messages.append({"role": "assistant", "content": latest})
     st.chat_message("assistant").markdown(latest)
 
-if st.button("Get Feedback on This Interaction"):
-    transcript = get_transcript_as_text(st.session_state.thread_id)
+# ✅ Only show button if there's a user message in the history
+if st.session_state.messages and any(msg["role"] == "user" for msg in st.session_state.messages):
+    st.markdown("---")
+    st.subheader("🧠 Ready to reflect?")
 
-    # Create new thread for feedback
-    feedback_thread = openai.beta.threads.create()
+    if st.button("Get Feedback on This Interaction"):
+        transcript = get_transcript_as_text(st.session_state.thread_id)
 
-    openai.beta.threads.messages.create(
-        thread_id=feedback_thread.id,
-        role="user",
-        content=f"Here is the transcript of a student interacting with a virtual patient. Please provide constructive feedback:\n\n{transcript}"
-    )
+        # Create new thread for feedback
+        feedback_thread = openai.beta.threads.create()
 
-    feedback_run = openai.beta.threads.runs.create(
-        thread_id=feedback_thread.id,
-        assistant_id=ASSISTANT_MAP["Mr. Aiken Feedback"],
-    )
+        openai.beta.threads.messages.create(
+            thread_id=feedback_thread.id,
+            role="user",
+            content=f"Here is the transcript of a student interacting with a virtual patient. Please provide constructive feedback:\n\n{transcript}"
+        )
 
-    with st.spinner("Generating feedback..."):
-        while True:
-            feedback_status = openai.beta.threads.runs.retrieve(
-                thread_id=feedback_thread.id,
-                run_id=feedback_run.id
-            )
-            if feedback_status.status == "completed":
-                break
+        feedback_run = openai.beta.threads.runs.create(
+            thread_id=feedback_thread.id,
+            assistant_id=ASSISTANT_MAP["Mr. Aiken Feedback"],
+        )
 
-    feedback_messages = openai.beta.threads.messages.list(thread_id=feedback_thread.id)
-    feedback_text = feedback_messages.data[0].content[0].text.value
+        with st.spinner("Generating feedback..."):
+            while True:
+                feedback_status = openai.beta.threads.runs.retrieve(
+                    thread_id=feedback_thread.id,
+                    run_id=feedback_run.id
+                )
+                if feedback_status.status == "completed":
+                    break
 
-    st.subheader("🧑‍🏫 Feedback from Coach")
-    st.markdown(feedback_text)
+        feedback_messages = openai.beta.threads.messages.list(thread_id=feedback_thread.id)
+        feedback_text = feedback_messages.data[0].content[0].text.value
 
-def get_transcript_as_text(thread_id):
-    messages = openai.beta.threads.messages.list(thread_id=thread_id)
-    transcript = ""
-    for msg in reversed(messages.data):  # to keep chronological order
-        role = msg.role.capitalize()
-        content = msg.content[0].text.value
-        transcript += f"{role}: {content}\n\n"
-    return transcript
+        st.subheader("🧑‍🏫 Feedback from Coach")
+        st.markdown(feedback_text)
