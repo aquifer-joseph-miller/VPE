@@ -22,10 +22,32 @@ def get_transcript_as_text(thread_id):
 # Secure API key handling
 openai.api_key = st.secrets["OPENAI_API_KEY"]
 
-st.title("Virtual Patient Actors (VPE)")
+# Custom CSS styling
+st.markdown(
+    """
+    <style>
+    .stApp {
+        background-color: rgba(27, 85, 153, 0.6); /* #1B5599 with 60% opacity */
+        color: white;
+    }
+    h1, h2, h3, h4, h5, h6, .st-emotion-cache-10trblm {
+        color: white; /* Ensure title and headings are white */
+    }
+    .st-emotion-cache-16idsys p {
+        color: white; /* Ensure chat messages are white */
+    }
+    .stTextInput > div > div > input {
+        color: white; /* Input text color */
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
+st.title("Virtual Patient Encounters (VPE)")
 
 # Sidebar: Select Actor
-actor = st.sidebar.selectbox("Choose an AI Actor", list(ASSISTANT_MAP.keys()))
+actor = st.sidebar.selectbox("Choose a Virtual Patient Encounter", list(ASSISTANT_MAP.keys()))
 assistant_id = ASSISTANT_MAP[actor]
 
 # Initialize session state
@@ -40,7 +62,7 @@ for msg in st.session_state.messages:
     st.chat_message(msg["role"]).markdown(msg["content"])
 
 # Chat input
-if prompt := st.chat_input("Say something to the actor..."):
+if prompt := st.chat_input("Start chatting with the virtual patient..."):
     st.session_state.messages.append({"role": "user", "content": prompt})
     st.chat_message("user").markdown(prompt)
 
