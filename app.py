@@ -7,10 +7,16 @@ from feedback_assistants import FEEDBACK_ASSISTANTS
 def get_transcript_as_text(thread_id):
     messages = openai.beta.threads.messages.list(thread_id=thread_id)
     transcript = ""
-    for msg in reversed(messages.data):  # to keep chronological order
-        role = msg.role.capitalize()
+    for msg in reversed(messages.data):  # chronological order
+        if msg.role == "user":
+            role_label = "STUDENT"
+        elif msg.role == "assistant":
+            role_label = "PATIENT"
+        else:
+            role_label = msg.role.upper()
+
         content = msg.content[0].text.value
-        transcript += f"{role}: {content}\n\n"
+        transcript += f"{role_label}: {content}\n\n"
     return transcript
 
 # Secure API key handling
@@ -100,5 +106,12 @@ if st.session_state.messages and any(msg["role"] == "user" for msg in st.session
         feedback_messages = openai.beta.threads.messages.list(thread_id=feedback_thread.id)
         feedback_text = feedback_messages.data[0].content[0].text.value
 
-        st.subheader("🧑‍🏫 Feedback from Coach")
-        st.markdown(feedback_text)
+# Show Feedback Coach icon next to the heading
+col1, col2 = st.columns([1, 8])
+with col1:
+    st.image("https://drive.google.com/uc?id=1FOLTw9RLgJLe8jCnBnbYFVWi2m6dUL7Z", width=40)
+with col2:
+    st.subheader("Feedback from Coach")
+
+# Feedback content
+st.markdown(feedback_text)
