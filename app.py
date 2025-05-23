@@ -1,6 +1,7 @@
 import streamlit as st
 import openai
 from assistants import ASSISTANT_MAP
+from feedback_assistants import FEEDBACK_ASSISTANTS
 
 # ✅ Keep this helper function unchanged
 def get_transcript_as_text(thread_id):
@@ -64,11 +65,6 @@ if prompt := st.chat_input("Say something to the actor..."):
     latest = messages.data[0].content[0].text.value
     st.session_state.messages.append({"role": "assistant", "content": latest})
     st.chat_message("assistant").markdown(latest)
-
-# 🔍 DEBUG: Add this temporarily to see what's in session state
-st.write("Debug - Messages in session state:", len(st.session_state.messages) if "messages" in st.session_state else "No messages key")
-if "messages" in st.session_state and st.session_state.messages:
-    st.write("Debug - Last few messages:", st.session_state.messages[-2:] if len(st.session_state.messages) >= 2 else st.session_state.messages)
 
 # ✅ Only show button if there's a user message in the history
 if st.session_state.messages and any(msg["role"] == "user" for msg in st.session_state.messages):
