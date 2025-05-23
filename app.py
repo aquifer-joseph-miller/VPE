@@ -2,32 +2,36 @@ import streamlit as st
 import openai
 from assistants import ASSISTANT_MAP
 
-# ✅ Secure version: API key from secrets (no hardcoding)
+# Secure API key handling
 openai.api_key = st.secrets["OPENAI_API_KEY"]
 
-# Custom CSS styling
+# 🔥 Custom CSS to set background color and text
 st.markdown(
     """
     <style>
     .stApp {
-        background-color: rgba(27, 85, 153, 0.6); /* #1B5599 with 60% opacity */
-        color: white;
+        background-color: rgba(27, 85, 153, 0.6) !important;
     }
-    h1, h2, h3, h4, h5, h6, .st-emotion-cache-10trblm {
-        color: white; /* Ensure title and headings are white */
+    h1, h2, h3, h4, h5, h6, p, label, div, span {
+        color: white !important;
     }
-    .st-emotion-cache-16idsys p {
-        color: white; /* Ensure chat messages are white */
+    .st-emotion-cache-6qob1r {
+        background-color: rgba(27, 85, 153, 0.8) !important;
     }
-    .stTextInput > div > div > input {
-        color: white; /* Input text color */
+    .stChatMessage {
+        color: white !important;
+    }
+    input {
+        color: white !important;
+    }
+    .st-emotion-cache-16txtl3, .st-emotion-cache-1pahdxg {
+        color: white !important;
     }
     </style>
     """,
     unsafe_allow_html=True
 )
 
-# Your existing app code continues below
 st.title("Virtual Patient Actors (VPE)")
 
 # Sidebar: Select Actor
