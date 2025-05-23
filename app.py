@@ -85,7 +85,7 @@ if st.session_state.messages and any(msg["role"] == "user" for msg in st.session
 
         feedback_run = openai.beta.threads.runs.create(
             thread_id=feedback_thread.id,
-            assistant_id=ASSISTANT_MAP["Mr. Aiken Feedback"],
+            assistant_id=FEEDBACK_ASSISTANTS["Mr. Aiken Feedback"],
         )
 
         with st.spinner("Generating feedback..."):
