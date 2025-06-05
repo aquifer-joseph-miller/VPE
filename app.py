@@ -3,7 +3,7 @@ import openai
 from assistants import ASSISTANT_MAP
 from feedback_assistants import FEEDBACK_ASSISTANTS
 
-# ✅ Keep this helper function unchanged
+# Keep this helper function unchanged
 def get_transcript_as_text(thread_id):
     messages = openai.beta.threads.messages.list(thread_id=thread_id)
     transcript = ""
@@ -19,7 +19,7 @@ def get_transcript_as_text(thread_id):
         transcript += f"{role_label}: {content}\n\n"
     return transcript
 
-# 🆕 Helper function to map patient encounters to feedback assistants
+# Helper function to map patient encounters to feedback assistants
 def get_feedback_assistant_key(actor_name):
     """
     Maps the selected VPE actor to the appropriate feedback assistant key.
@@ -34,7 +34,7 @@ def get_feedback_assistant_key(actor_name):
     
     return feedback_mapping.get(actor_name, "Mr. Aiken Feedback")  # Default fallback
 
-# 🆕 Helper function to get patient name for feedback context
+# Helper function to get patient name for feedback context
 def get_patient_name(actor_name):
     """Extract the patient name from the actor selection for feedback context."""
     if "Mr. Aiken" in actor_name:
@@ -59,11 +59,11 @@ if "messages" not in st.session_state:
 if "thread_id" not in st.session_state:
     thread = openai.beta.threads.create()
     st.session_state.thread_id = thread.id
-# 🆕 Store the selected actor in session state to maintain consistency
+# Store the selected actor in session state to maintain consistency
 if "selected_actor" not in st.session_state:
     st.session_state.selected_actor = actor
 
-# 🆕 Update selected actor if user changes selection (this will reset the conversation)
+# Update selected actor if user changes selection (this will reset the conversation)
 if st.session_state.selected_actor != actor:
     st.session_state.selected_actor = actor
     st.session_state.messages = []
@@ -107,7 +107,7 @@ if prompt := st.chat_input("Start chatting with the virtual patient..."):
     st.session_state.messages.append({"role": "assistant", "content": latest})
     st.chat_message("assistant").markdown(latest)
 
-# ✅ Only show button if there's a user message in the history
+# Only show button if there's a user message in the history
 # Count how many user messages exist
 user_message_count = sum(1 for msg in st.session_state.messages if msg["role"] == "user")
 
@@ -115,8 +115,8 @@ if user_message_count >= 5:
     st.markdown("---")
     st.subheader("🧠 Ready to end the interview and get feedback?")
     
-    if st.button("Get Feedback!"):
-        # 🆕 Get the appropriate feedback assistant for the selected actor
+    if st.button("Generate Feedback!"):
+        # Get the appropriate feedback assistant for the selected actor
         feedback_assistant_key = get_feedback_assistant_key(st.session_state.selected_actor)
         patient_name = get_patient_name(st.session_state.selected_actor)
         
@@ -130,7 +130,7 @@ if user_message_count >= 5:
         # Create new thread for feedback
         feedback_thread = openai.beta.threads.create()
 
-        # 🆕 Updated feedback prompt to be more dynamic
+        # Updated feedback prompt to be more dynamic
         openai.beta.threads.messages.create(
             thread_id=feedback_thread.id,
             role="user",
@@ -144,7 +144,7 @@ Transcript:
 """
         )
 
-        # 🆕 Use the dynamically selected feedback assistant
+        # Use the dynamically selected feedback assistant
         feedback_run = openai.beta.threads.runs.create(
             thread_id=feedback_thread.id,
             assistant_id=FEEDBACK_ASSISTANTS[feedback_assistant_key],
@@ -167,7 +167,7 @@ Transcript:
         with col1:
             st.image("https://imgur.com/BVSjFOh.png", width=40)
         with col2:
-            st.subheader("Leslie's Feedback")
+            st.subheader("Feedback on exploration of all relevant problem areas")
 
         # 📝 Feedback content
         st.markdown(feedback_text)
