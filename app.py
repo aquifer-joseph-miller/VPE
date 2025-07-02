@@ -14,7 +14,6 @@ def get_transcript_as_text(thread_id):
             role_label = "PATIENT"
         else:
             role_label = msg.role.upper()
-
         content = msg.content[0].text.value
         transcript += f"{role_label}: {content}\n\n"
     return transcript
@@ -30,6 +29,7 @@ def get_feedback_assistant_key(actor_name):
         "Mr. Aiken (Challenging)": "Mr. Aiken Feedback",  # Same feedback assistant for both versions
         "Mr. Smith (Standard)": "Mr. Smith Feedback",
         "Mr. Smith (Challenging)": "Mr. Smith Feedback",  # Same feedback assistant for both versions
+        "Mrs. Kelly (Standard)": "Mrs. Kelly Feedback",
     }
     
     return feedback_mapping.get(actor_name, "Mr. Aiken Feedback")  # Default fallback
@@ -41,6 +41,8 @@ def get_patient_name(actor_name):
         return "Mr. Aiken"
     elif "Mr. Smith" in actor_name:
         return "Mr. Smith"
+    elif "Mrs. Kelly" in actor_name:
+        return "Mrs. Kelly"
     else:
         return "the patient"  # Generic fallback
 
@@ -56,9 +58,11 @@ assistant_id = ASSISTANT_MAP[actor]
 # Initialize session state
 if "messages" not in st.session_state:
     st.session_state.messages = []
+
 if "thread_id" not in st.session_state:
     thread = openai.beta.threads.create()
     st.session_state.thread_id = thread.id
+
 # Store the selected actor in session state to maintain consistency
 if "selected_actor" not in st.session_state:
     st.session_state.selected_actor = actor
