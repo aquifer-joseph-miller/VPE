@@ -34,6 +34,21 @@ def get_feedback_assistant_key(actor_name):
     
     return feedback_mapping.get(actor_name, "Mr. Aiken Feedback")  # Default fallback
 
+# Helper function to map patient encounters to breadth feedback assistants
+def get_breadth_feedback_assistant_key(actor_name):
+    """
+    Maps the selected VPE actor to the appropriate breadth feedback assistant key.
+    """
+    breadth_feedback_mapping = {
+        "Mr. Aiken (Standard)": "Mr. Aiken Feedback - Breadth",
+        "Mr. Aiken (Challenging)": "Mr. Aiken Feedback - Breadth",  # Same breadth feedback assistant for both versions
+        "Mr. Smith (Standard)": "Mr. Smith Feedback - Breadth",
+        "Mr. Smith (Challenging)": "Mr. Smith Feedback - Breadth",  # Same breadth feedback assistant for both versions
+        "Mrs. Kelly (Standard)": "Mrs. Kelly Feedback - Breadth",
+    }
+    
+    return breadth_feedback_mapping.get(actor_name, "Mr. Aiken Feedback - Breadth")  # Default fallback
+
 # Helper function to get patient name for feedback context
 def get_patient_name(actor_name):
     """Extract the patient name from the actor selection for feedback context."""
@@ -120,18 +135,24 @@ if user_message_count >= 5:
     st.subheader("🧠 Ready to end the interview and get feedback?")
     
     if st.button("Generate Feedback!"):
-        # Get the appropriate feedback assistant for the selected actor
+        # Get the appropriate feedback assistants for the selected actor
         feedback_assistant_key = get_feedback_assistant_key(st.session_state.selected_actor)
+        breadth_feedback_assistant_key = get_breadth_feedback_assistant_key(st.session_state.selected_actor)
         patient_name = get_patient_name(st.session_state.selected_actor)
         
-        # Check if the feedback assistant exists
+        # Check if both feedback assistants exist
         if feedback_assistant_key not in FEEDBACK_ASSISTANTS:
             st.error(f"Feedback assistant '{feedback_assistant_key}' not found. Please check your feedback_assistants configuration.")
+            st.stop()
+            
+        if breadth_feedback_assistant_key not in FEEDBACK_ASSISTANTS:
+            st.error(f"Breadth feedback assistant '{breadth_feedback_assistant_key}' not found. Please check your feedback_assistants configuration.")
             st.stop()
 
         transcript = get_transcript_as_text(st.session_state.thread_id)
 
-        # Create new thread for feedback
+        # Generate Overall Feedback
+        # Create new thread for overall feedback
         feedback_thread = openai.beta.threads.create()
 
         # Updated feedback prompt to be more dynamic
@@ -154,7 +175,7 @@ Transcript:
             assistant_id=FEEDBACK_ASSISTANTS[feedback_assistant_key],
         )
 
-        with st.spinner("Generating feedback..."):
+        with st.spinner("Generating overall feedback..."):
             while True:
                 feedback_status = openai.beta.threads.runs.retrieve(
                     thread_id=feedback_thread.id,
@@ -164,8 +185,9 @@ Transcript:
                     break
 
         feedback_messages = openai.beta.threads.messages.list(thread_id=feedback_thread.id)
-        feedback_text = feedback_messages.data[0].content[0].text.value
+        overall_feedback_text = feedback_messages.data[0].content[0].text.value
 
+        # Display Overall Feedback
         # 🎨 Feedback icon + title (could also be made dynamic based on patient)
         col1, col2 = st.columns([1, 8])
         with col1:
@@ -174,4 +196,46 @@ Transcript:
             st.subheader("Feedback on exploration of all relevant problem areas")
 
         # 📝 Feedback content
-        st.markdown(feedback_text)
+        st.markdown(overall_feedback_text)
+
+        # Generate Breadth Feedback
+        # Create new thread for breadth feedback
+        breadth_feedback_thread = openai.beta.threads.create()
+
+        # Breadth-specific feedback prompt
+        openai.beta.threads.messages.create(
+            thread_id=breadth_feedback_thread.id,
+            role="user",
+            content=f"""
+Below is a transcript of a simulated patient encounter. The STUDENT is a medical learner. The PATIENT is {patient_name}, a virtual patient powered by AI.
+
+Please provide constructive feedback **only on the STUDENT's performance** specifically focused on breadth of data gathering - the extent of exploration to find all relevant problem areas in the patient's situation. Do not critique the patient responses.
+
+Transcript:
+{transcript}
+"""
+        )
+
+        # Use the breadth feedback assistant
+        breadth_feedback_run = openai.beta.threads.runs.create(
+            thread_id=breadth_feedback_thread.id,
+            assistant_id=FEEDBACK_ASSISTANTS[breadth_feedback_assistant_key],
+        )
+
+        with st.spinner("Generating breadth feedback..."):
+            while True:
+                breadth_feedback_status = openai.beta.threads.runs.retrieve(
+                    thread_id=breadth_feedback_thread.id,
+                    run_id=breadth_feedback_run.id
+                )
+                if breadth_feedback_status.status == "completed":
+                    break
+
+        breadth_feedback_messages = openai.beta.threads.messages.list(thread_id=breadth_feedback_thread.id)
+        breadth_feedback_text = breadth_feedback_messages.data[0].content[0].text.value
+
+        # Display Breadth Feedback Section
+        st.markdown("---")
+        st.subheader("📊 Breadth (Data Gathering)")
+        st.markdown("*The extent of exploration to find all relevant problem areas in the patient's situation*")
+        st.markdown(breadth_feedback_text)
