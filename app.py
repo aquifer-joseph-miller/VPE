@@ -140,13 +140,17 @@ if user_message_count >= 5:
         breadth_feedback_assistant_key = get_breadth_feedback_assistant_key(st.session_state.selected_actor)
         patient_name = get_patient_name(st.session_state.selected_actor)
         
-        # Check if both feedback assistants exist
+        # Check if all feedback assistants exist
         if feedback_assistant_key not in FEEDBACK_ASSISTANTS:
             st.error(f"Feedback assistant '{feedback_assistant_key}' not found. Please check your feedback_assistants configuration.")
             st.stop()
             
         if breadth_feedback_assistant_key not in FEEDBACK_ASSISTANTS:
             st.error(f"Breadth feedback assistant '{breadth_feedback_assistant_key}' not found. Please check your feedback_assistants configuration.")
+            st.stop()
+            
+        if "Depth Feedback" not in FEEDBACK_ASSISTANTS:
+            st.error(f"Depth feedback assistant 'Depth Feedback' not found. Please check your feedback_assistants configuration.")
             st.stop()
 
         transcript = get_transcript_as_text(st.session_state.thread_id)
@@ -239,3 +243,45 @@ Transcript:
         st.subheader("📊 Breadth (Data Gathering)")
         st.markdown("*The extent of exploration to find all relevant problem areas in the patient's situation*")
         st.markdown(breadth_feedback_text)
+
+        # Generate Depth Feedback
+        # Create new thread for depth feedback
+        depth_feedback_thread = openai.beta.threads.create()
+
+        # Depth-specific feedback prompt
+        openai.beta.threads.messages.create(
+            thread_id=depth_feedback_thread.id,
+            role="user",
+            content=f"""
+Below is a transcript of a simulated patient encounter. The STUDENT is a medical learner. The PATIENT is {patient_name}, a virtual patient powered by AI.
+
+Please provide constructive feedback **only on the STUDENT's performance** specifically focused on depth and appropriateness in following up symptoms. Do not critique the patient responses.
+
+Transcript:
+{transcript}
+"""
+        )
+
+        # Use the depth feedback assistant
+        depth_feedback_run = openai.beta.threads.runs.create(
+            thread_id=depth_feedback_thread.id,
+            assistant_id=FEEDBACK_ASSISTANTS["Depth Feedback"],
+        )
+
+        with st.spinner("Generating depth feedback..."):
+            while True:
+                depth_feedback_status = openai.beta.threads.runs.retrieve(
+                    thread_id=depth_feedback_thread.id,
+                    run_id=depth_feedback_run.id
+                )
+                if depth_feedback_status.status == "completed":
+                    break
+
+        depth_feedback_messages = openai.beta.threads.messages.list(thread_id=depth_feedback_thread.id)
+        depth_feedback_text = depth_feedback_messages.data[0].content[0].text.value
+
+        # Display Depth Feedback Section
+        st.markdown("---")
+        st.subheader("🔍 Depth")
+        st.markdown("*Depth and appropriateness in following up symptoms*")
+        st.markdown(depth_feedback_text)

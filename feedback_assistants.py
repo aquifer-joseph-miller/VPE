@@ -5,5 +5,6 @@ FEEDBACK_ASSISTANTS = {
     "Mr. Smith Feedback": "asst_mfGdc7BVIVo6PSTQf6EicNiy", 
     "Mr. Smith Feedback - Breadth": "asst_mfGdc7BVIVo6PSTQf6EicNiy",
     "Mrs. Kelly Feedback": "asst_8HCOI2YWOeqBejP68Z2FQP3A",
-    "Mrs. Kelly Feedback - Breadth": "asst_PYgRyEEVRohlODq2ENxmQnRw"
+    "Mrs. Kelly Feedback - Breadth": "asst_PYgRyEEVRohlODq2ENxmQnRw",
+    "Depth Feedback": "asst_pG7EXYO2ajB7ZXx2NtNB7Sef"
 }
