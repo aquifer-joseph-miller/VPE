@@ -152,6 +152,10 @@ if user_message_count >= 5:
         if "Depth Feedback" not in FEEDBACK_ASSISTANTS:
             st.error(f"Depth feedback assistant 'Depth Feedback' not found. Please check your feedback_assistants configuration.")
             st.stop()
+            
+        if "Relevance Feedback" not in FEEDBACK_ASSISTANTS:
+            st.error(f"Relevance feedback assistant 'Relevance Feedback' not found. Please check your feedback_assistants configuration.")
+            st.stop()
 
         transcript = get_transcript_as_text(st.session_state.thread_id)
 
@@ -285,3 +289,45 @@ Transcript:
         st.subheader("🔍 Depth")
         st.markdown("*Depth and appropriateness in following up symptoms*")
         st.markdown(depth_feedback_text)
+
+        # Generate Relevance Feedback
+        # Create new thread for relevance feedback
+        relevance_feedback_thread = openai.beta.threads.create()
+
+        # Relevance-specific feedback prompt
+        openai.beta.threads.messages.create(
+            thread_id=relevance_feedback_thread.id,
+            role="user",
+            content=f"""
+Below is a transcript of a simulated patient encounter. The STUDENT is a medical learner. The PATIENT is {patient_name}, a virtual patient powered by AI.
+
+Please provide constructive feedback **only on the STUDENT's performance** specifically focused on clinical appropriateness and efficiency in questioning. Do not critique the patient responses.
+
+Transcript:
+{transcript}
+"""
+        )
+
+        # Use the relevance feedback assistant
+        relevance_feedback_run = openai.beta.threads.runs.create(
+            thread_id=relevance_feedback_thread.id,
+            assistant_id=FEEDBACK_ASSISTANTS["Relevance Feedback"],
+        )
+
+        with st.spinner("Generating relevance feedback..."):
+            while True:
+                relevance_feedback_status = openai.beta.threads.runs.retrieve(
+                    thread_id=relevance_feedback_thread.id,
+                    run_id=relevance_feedback_run.id
+                )
+                if relevance_feedback_status.status == "completed":
+                    break
+
+        relevance_feedback_messages = openai.beta.threads.messages.list(thread_id=relevance_feedback_thread.id)
+        relevance_feedback_text = relevance_feedback_messages.data[0].content[0].text.value
+
+        # Display Relevance Feedback Section
+        st.markdown("---")
+        st.subheader("⚡ Clinical Relevance and Efficiency")
+        st.markdown("*Clinical appropriateness and efficiency in questioning*")
+        st.markdown(relevance_feedback_text)
