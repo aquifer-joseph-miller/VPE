@@ -18,22 +18,6 @@ def get_transcript_as_text(thread_id):
         transcript += f"{role_label}: {content}\n\n"
     return transcript
 
-# Helper function to map patient encounters to feedback assistants
-def get_feedback_assistant_key(actor_name):
-    """
-    Maps the selected VPE actor to the appropriate feedback assistant key.
-    Modify this mapping based on your FEEDBACK_ASSISTANTS dictionary structure.
-    """
-    feedback_mapping = {
-        "Mr. Aiken (Standard)": "Mr. Aiken Feedback",
-        "Mr. Aiken (Challenging)": "Mr. Aiken Feedback",  # Same feedback assistant for both versions
-        "Mr. Smith (Standard)": "Mr. Smith Feedback",
-        "Mr. Smith (Challenging)": "Mr. Smith Feedback",  # Same feedback assistant for both versions
-        "Mrs. Kelly (Standard)": "Mrs. Kelly Feedback",
-    }
-    
-    return feedback_mapping.get(actor_name, "Mr. Aiken Feedback")  # Default fallback
-
 # Helper function to map patient encounters to breadth feedback assistants
 def get_breadth_feedback_assistant_key(actor_name):
     """
@@ -136,15 +120,10 @@ if user_message_count >= 5:
     
     if st.button("Generate Feedback!"):
         # Get the appropriate feedback assistants for the selected actor
-        feedback_assistant_key = get_feedback_assistant_key(st.session_state.selected_actor)
         breadth_feedback_assistant_key = get_breadth_feedback_assistant_key(st.session_state.selected_actor)
         patient_name = get_patient_name(st.session_state.selected_actor)
         
         # Check if all feedback assistants exist
-        if feedback_assistant_key not in FEEDBACK_ASSISTANTS:
-            st.error(f"Feedback assistant '{feedback_assistant_key}' not found. Please check your feedback_assistants configuration.")
-            st.stop()
-            
         if breadth_feedback_assistant_key not in FEEDBACK_ASSISTANTS:
             st.error(f"Breadth feedback assistant '{breadth_feedback_assistant_key}' not found. Please check your feedback_assistants configuration.")
             st.stop()
@@ -158,53 +137,6 @@ if user_message_count >= 5:
             st.stop()
 
         transcript = get_transcript_as_text(st.session_state.thread_id)
-
-        # Generate Overall Feedback
-        # Create new thread for overall feedback
-        feedback_thread = openai.beta.threads.create()
-
-        # Updated feedback prompt to be more dynamic
-        openai.beta.threads.messages.create(
-            thread_id=feedback_thread.id,
-            role="user",
-            content=f"""
-Below is a transcript of a simulated patient encounter. The STUDENT is a medical learner. The PATIENT is {patient_name}, a virtual patient powered by AI.
-
-Please provide constructive feedback **only on the STUDENT's performance**, including their tone, communication style, question quality, and clinical reasoning. Do not critique the patient responses.
-
-Transcript:
-{transcript}
-"""
-        )
-
-        # Use the dynamically selected feedback assistant
-        feedback_run = openai.beta.threads.runs.create(
-            thread_id=feedback_thread.id,
-            assistant_id=FEEDBACK_ASSISTANTS[feedback_assistant_key],
-        )
-
-        with st.spinner("Generating overall feedback..."):
-            while True:
-                feedback_status = openai.beta.threads.runs.retrieve(
-                    thread_id=feedback_thread.id,
-                    run_id=feedback_run.id
-                )
-                if feedback_status.status == "completed":
-                    break
-
-        feedback_messages = openai.beta.threads.messages.list(thread_id=feedback_thread.id)
-        overall_feedback_text = feedback_messages.data[0].content[0].text.value
-
-        # Display Overall Feedback
-        # 🎨 Feedback icon + title (could also be made dynamic based on patient)
-        col1, col2 = st.columns([1, 8])
-        with col1:
-            st.image("https://imgur.com/BVSjFOh.png", width=40)
-        with col2:
-            st.subheader("Feedback on exploration of all relevant problem areas")
-
-        # 📝 Feedback content
-        st.markdown(overall_feedback_text)
 
         # Generate Breadth Feedback
         # Create new thread for breadth feedback
@@ -243,7 +175,6 @@ Transcript:
         breadth_feedback_text = breadth_feedback_messages.data[0].content[0].text.value
 
         # Display Breadth Feedback Section
-        st.markdown("---")
         st.subheader("📊 Breadth (Data Gathering)")
         st.markdown("*The extent of exploration to find all relevant problem areas in the patient's situation*")
         st.markdown(breadth_feedback_text)
