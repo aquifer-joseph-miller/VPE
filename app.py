@@ -124,17 +124,18 @@ if user_message_count >= 5:
         patient_name = get_patient_name(st.session_state.selected_actor)
         
         # Check if all feedback assistants exist
-        if breadth_feedback_assistant_key not in FEEDBACK_ASSISTANTS:
-            st.error(f"Breadth feedback assistant '{breadth_feedback_assistant_key}' not found. Please check your feedback_assistants configuration.")
-            st.stop()
-            
-        if "Depth Feedback" not in FEEDBACK_ASSISTANTS:
-            st.error(f"Depth feedback assistant 'Depth Feedback' not found. Please check your feedback_assistants configuration.")
-            st.stop()
-            
-        if "Relevance Feedback" not in FEEDBACK_ASSISTANTS:
-            st.error(f"Relevance feedback assistant 'Relevance Feedback' not found. Please check your feedback_assistants configuration.")
-            st.stop()
+        feedback_assistants_to_check = [
+            (breadth_feedback_assistant_key, "Breadth feedback assistant"),
+            ("Depth Feedback", "Depth feedback assistant"),
+            ("Relevance Feedback", "Relevance feedback assistant"),
+            ("Questioning Mix Feedback", "Questioning Mix feedback assistant"),
+            ("Patient Interaction Feedback", "Patient Interaction feedback assistant")
+        ]
+        
+        for assistant_key, assistant_name in feedback_assistants_to_check:
+            if assistant_key not in FEEDBACK_ASSISTANTS:
+                st.error(f"{assistant_name} '{assistant_key}' not found. Please check your feedback_assistants configuration.")
+                st.stop()
 
         transcript = get_transcript_as_text(st.session_state.thread_id)
 
@@ -262,3 +263,87 @@ Transcript:
         st.subheader("⚡ Clinical Relevance and Efficiency")
         st.markdown("*Clinical appropriateness and efficiency in questioning*")
         st.markdown(relevance_feedback_text)
+
+        # Generate Questioning Mix Feedback
+        # Create new thread for questioning mix feedback
+        questioning_mix_feedback_thread = openai.beta.threads.create()
+
+        # Questioning Mix-specific feedback prompt
+        openai.beta.threads.messages.create(
+            thread_id=questioning_mix_feedback_thread.id,
+            role="user",
+            content=f"""
+Below is a transcript of a simulated patient encounter. The STUDENT is a medical learner. The PATIENT is {patient_name}, a virtual patient powered by AI.
+
+Please provide constructive feedback **only on the STUDENT's performance** specifically focused on the mix and variety of questioning techniques used. Do not critique the patient responses.
+
+Transcript:
+{transcript}
+"""
+        )
+
+        # Use the questioning mix feedback assistant
+        questioning_mix_feedback_run = openai.beta.threads.runs.create(
+            thread_id=questioning_mix_feedback_thread.id,
+            assistant_id=FEEDBACK_ASSISTANTS["Questioning Mix Feedback"],
+        )
+
+        with st.spinner("Generating questioning mix feedback..."):
+            while True:
+                questioning_mix_feedback_status = openai.beta.threads.runs.retrieve(
+                    thread_id=questioning_mix_feedback_thread.id,
+                    run_id=questioning_mix_feedback_run.id
+                )
+                if questioning_mix_feedback_status.status == "completed":
+                    break
+
+        questioning_mix_feedback_messages = openai.beta.threads.messages.list(thread_id=questioning_mix_feedback_thread.id)
+        questioning_mix_feedback_text = questioning_mix_feedback_messages.data[0].content[0].text.value
+
+        # Display Questioning Mix Feedback Section
+        st.markdown("---")
+        st.subheader("❓ Questioning Mix")
+        st.markdown("*Mix and variety of questioning techniques used*")
+        st.markdown(questioning_mix_feedback_text)
+
+        # Generate Patient Interaction Feedback
+        # Create new thread for patient interaction feedback
+        patient_interaction_feedback_thread = openai.beta.threads.create()
+
+        # Patient Interaction-specific feedback prompt
+        openai.beta.threads.messages.create(
+            thread_id=patient_interaction_feedback_thread.id,
+            role="user",
+            content=f"""
+Below is a transcript of a simulated patient encounter. The STUDENT is a medical learner. The PATIENT is {patient_name}, a virtual patient powered by AI.
+
+Please provide constructive feedback **only on the STUDENT's performance** specifically focused on patient interaction skills, communication style, and bedside manner. Do not critique the patient responses.
+
+Transcript:
+{transcript}
+"""
+        )
+
+        # Use the patient interaction feedback assistant
+        patient_interaction_feedback_run = openai.beta.threads.runs.create(
+            thread_id=patient_interaction_feedback_thread.id,
+            assistant_id=FEEDBACK_ASSISTANTS["Patient Interaction Feedback"],
+        )
+
+        with st.spinner("Generating patient interaction feedback..."):
+            while True:
+                patient_interaction_feedback_status = openai.beta.threads.runs.retrieve(
+                    thread_id=patient_interaction_feedback_thread.id,
+                    run_id=patient_interaction_feedback_run.id
+                )
+                if patient_interaction_feedback_status.status == "completed":
+                    break
+
+        patient_interaction_feedback_messages = openai.beta.threads.messages.list(thread_id=patient_interaction_feedback_thread.id)
+        patient_interaction_feedback_text = patient_interaction_feedback_messages.data[0].content[0].text.value
+
+        # Display Patient Interaction Feedback Section
+        st.markdown("---")
+        st.subheader("👥 Patient Interaction")
+        st.markdown("*Patient interaction skills, communication style, and bedside manner*")
+        st.markdown(patient_interaction_feedback_text)

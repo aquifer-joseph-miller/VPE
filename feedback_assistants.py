@@ -7,5 +7,7 @@ FEEDBACK_ASSISTANTS = {
     "Mrs. Kelly Feedback": "asst_8HCOI2YWOeqBejP68Z2FQP3A",
     "Mrs. Kelly Feedback - Breadth": "asst_PYgRyEEVRohlODq2ENxmQnRw",
     "Depth Feedback": "asst_pG7EXYO2ajB7ZXx2NtNB7Sef", 
-    "Relevance Feedback": "asst_pYiPS8q7gSmEXw07wgZy8x2T"
+    "Relevance Feedback": "asst_pYiPS8q7gSmEXw07wgZy8x2T",
+    "Questioning Mix Feedback": "asst_exFefvDw3uWgRzhc9b5WNalJ", 
+    "Patient Interaction Feedback": "asst_s8F3SHRjSq4EyqZJGp3TpJ8x"
 }
