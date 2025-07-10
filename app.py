@@ -123,65 +123,28 @@ if user_message_count >= 5:
         feedback_assistant_key = get_feedback_assistant_key(st.session_state.selected_actor)
         patient_name = get_patient_name(st.session_state.selected_actor)
         
-        # DEBUG LOGGING
-        st.write("### 🔍 DEBUG INFORMATION")
-        st.write(f"**Selected Actor:** {st.session_state.selected_actor}")
-        st.write(f"**Feedback Assistant Key:** {feedback_assistant_key}")
-        st.write(f"**Patient Name:** {patient_name}")
-        
         # Check if the feedback assistant exists
         if feedback_assistant_key not in FEEDBACK_ASSISTANTS:
             st.error(f"Feedback assistant '{feedback_assistant_key}' not found. Please check your feedback_assistants configuration.")
             st.stop()
         
         assistant_id_to_use = FEEDBACK_ASSISTANTS[feedback_assistant_key]
-        st.write(f"**Assistant ID being used:** {assistant_id_to_use}")
-        
-        # Display all available assistants for verification
-        st.write("**All Available Feedback Assistants:**")
-        for key, value in FEEDBACK_ASSISTANTS.items():
-            if key == feedback_assistant_key:
-                st.write(f"→ **{key}**: {value} ← USING THIS ONE")
-            else:
-                st.write(f"   {key}: {value}")
-        
         transcript = get_transcript_as_text(st.session_state.thread_id)
-        
-        # Show transcript preview for debugging
-        st.write("**Transcript Preview (first 500 chars):**")
-        st.text(transcript[:500] + "..." if len(transcript) > 500 else transcript)
         
         # Generate Overall Feedback
         # Create new thread for feedback
         feedback_thread = openai.beta.threads.create()
         
-        # FORCED FORMAT MESSAGE
-        user_message_content = f"""
-Below is a transcript of a student's chat with virtual standardized patient {patient_name}. 
-
-CRITICAL REQUIREMENT: You MUST respond using the exact structured format specified in your system instructions. Your response MUST start with:
-
-### PERFORMANCE SUMMARY
-**Domain 1 - Breadth:** [Green ✅ OR Yellow ⚠️ OR Red ❌]
-**Domain 2 - Depth:** [Green ✅ OR Yellow ⚠️ OR Red ❌]
-**Domain 3 - Clinical Relevance:** [Green ✅ OR Yellow ⚠️ OR Red ❌]
-**Domain 4 - Questioning Technique:** [Green ✅ OR Yellow ⚠️ OR Red ❌]
-**Domain 5 - Patient Interaction:** [Green ✅ OR Yellow ⚠️ OR Red ❌]
-
-Do NOT provide narrative feedback. Follow the structured domain analysis format exactly as specified in your instructions.
+        # Feedback prompt
+        openai.beta.threads.messages.create(
+            thread_id=feedback_thread.id,
+            role="user",
+            content=f"""
+Below is a transcript of a student's chat with virtual standardized patient {patient_name}. Please evaluate the student's performance using the five-domain assessment framework.
 
 Transcript:
 {transcript}
 """
-        
-        st.write("**User Message Being Sent:**")
-        st.text_area("Message Preview", user_message_content, height=200)
-        
-        # Overall feedback prompt
-        openai.beta.threads.messages.create(
-            thread_id=feedback_thread.id,
-            role="user",
-            content=user_message_content
         )
         
         # Use the main feedback assistant
@@ -189,8 +152,6 @@ Transcript:
             thread_id=feedback_thread.id,
             assistant_id=assistant_id_to_use,
         )
-        
-        st.write(f"**Run Created with ID:** {feedback_run.id}")
         
         with st.spinner("Generating comprehensive feedback..."):
             while True:
@@ -201,19 +162,11 @@ Transcript:
                 if feedback_status.status == "completed":
                     break
                 elif feedback_status.status in ["failed", "cancelled", "expired"]:
-                    st.error(f"Feedback generation failed with status: {feedback_status.status}")
-                    if hasattr(feedback_status, 'last_error') and feedback_status.last_error:
-                        st.error(f"Error details: {feedback_status.last_error}")
+                    st.error(f"Feedback generation failed. Please try again.")
                     st.stop()
-        
-        st.write(f"**Run Status:** {feedback_status.status}")
         
         feedback_messages = openai.beta.threads.messages.list(thread_id=feedback_thread.id)
         feedback_text = feedback_messages.data[0].content[0].text.value
-        
-        # Show raw response for debugging
-        st.write("**Raw Response (first 1000 chars):**")
-        st.text_area("Raw Response Preview", feedback_text[:1000] + "..." if len(feedback_text) > 1000 else feedback_text, height=200)
         
         # Display Overall Feedback Section
         st.subheader("📋 Comprehensive Feedback")
