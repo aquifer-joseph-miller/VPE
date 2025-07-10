@@ -139,9 +139,7 @@ if user_message_count >= 5:
             thread_id=feedback_thread.id,
             role="user",
             content=f"""
-Below is a transcript of a simulated patient encounter. The STUDENT is a medical learner. The PATIENT is {patient_name}, a virtual patient powered by AI.
-
-Please provide comprehensive constructive feedback **only on the STUDENT's performance** covering all aspects of their clinical interview skills. Do not critique the patient responses.
+Below is a transcript of a student's chat with virtual standardized patient {patient_name}. Please evaluate the student's performance using the five-domain assessment framework.
 
 Transcript:
 {transcript}
