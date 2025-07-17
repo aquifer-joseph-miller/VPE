@@ -7,7 +7,7 @@ def get_transcript_as_text(thread_id):
     # grab more history at once
     messages = openai.beta.threads.messages.list(
         thread_id=thread_id,
-        page_size=100      # bump this up if your conversation is longer
+        limit=100      # bump this up if your conversation is longer
     )
     transcript = ""
     # messages.data is newest‑first, so reverse it for chronological order
@@ -167,7 +167,7 @@ Transcript:
         # Fetch the full feedback reply
         feedback_messages = openai.beta.threads.messages.list(
             thread_id=feedback_thread.id,
-            page_size=100
+            limit=100
         )
         assistant_replies = [
             m for m in feedback_messages.data
