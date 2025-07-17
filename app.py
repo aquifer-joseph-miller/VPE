@@ -3,11 +3,15 @@ import openai
 from assistants import ASSISTANT_MAP
 from feedback_assistants import FEEDBACK_ASSISTANTS
 
-# Keep this helper function unchanged
 def get_transcript_as_text(thread_id):
-    messages = openai.beta.threads.messages.list(thread_id=thread_id)
+    # grab more history at once
+    messages = openai.beta.threads.messages.list(
+        thread_id=thread_id,
+        page_size=100      # bump this up if your conversation is longer
+    )
     transcript = ""
-    for msg in reversed(messages.data):  # chronological order
+    # messages.data is newest‑first, so reverse it for chronological order
+    for msg in reversed(messages.data):
         if msg.role == "user":
             role_label = "STUDENT"
         elif msg.role == "assistant":
@@ -18,7 +22,6 @@ def get_transcript_as_text(thread_id):
         transcript += f"{role_label}: {content}\n\n"
     return transcript
 
-# Helper function to map patient encounters to main feedback assistants
 def get_feedback_assistant_key(actor_name):
     """
     Maps the selected VPE actor to the appropriate main feedback assistant key.
@@ -26,14 +29,12 @@ def get_feedback_assistant_key(actor_name):
     feedback_mapping = {
         "Mr. Aiken (Standard)": "Mr. Aiken Feedback",
         "Mr. Aiken (Challenging)": "Mr. Aiken Feedback",
-        "Mr. Smith (Standard)": "Mr. Smith Feedback",
+        "Mr. Smith (Standard)":  "Mr. Smith Feedback",
         "Mr. Smith (Challenging)": "Mr. Smith Feedback",
-        "Mrs. Kelly (Standard)": "Mrs. Kelly Feedback",
+        "Mrs. Kelly (Standard)":  "Mrs. Kelly Feedback",
     }
-    
-    return feedback_mapping.get(actor_name, "Mr. Aiken Feedback")  # Default fallback
+    return feedback_mapping.get(actor_name, "Mr. Aiken Feedback")
 
-# Helper function to get patient name for feedback context
 def get_patient_name(actor_name):
     """Extract the patient name from the actor selection for feedback context."""
     if "Mr. Aiken" in actor_name:
@@ -43,7 +44,7 @@ def get_patient_name(actor_name):
     elif "Mrs. Kelly" in actor_name:
         return "Mrs. Kelly"
     else:
-        return "the patient"  # Generic fallback
+        return "the patient"
 
 # Secure API key handling
 openai.api_key = st.secrets["OPENAI_API_KEY"]
@@ -51,22 +52,22 @@ openai.api_key = st.secrets["OPENAI_API_KEY"]
 st.title("Virtual Patient Encounters (VPE)")
 
 # Sidebar: Select Actor
-actor = st.sidebar.selectbox("Choose a Virtual Patient Encounter", list(ASSISTANT_MAP.keys()))
+actor = st.sidebar.selectbox(
+    "Choose a Virtual Patient Encounter",
+    list(ASSISTANT_MAP.keys())
+)
 assistant_id = ASSISTANT_MAP[actor]
 
 # Initialize session state
 if "messages" not in st.session_state:
     st.session_state.messages = []
-
 if "thread_id" not in st.session_state:
     thread = openai.beta.threads.create()
     st.session_state.thread_id = thread.id
-
-# Store the selected actor in session state to maintain consistency
 if "selected_actor" not in st.session_state:
     st.session_state.selected_actor = actor
 
-# Update selected actor if user changes selection (this will reset the conversation)
+# Reset conversation if actor changes
 if st.session_state.selected_actor != actor:
     st.session_state.selected_actor = actor
     st.session_state.messages = []
@@ -81,19 +82,18 @@ for msg in st.session_state.messages:
 if prompt := st.chat_input("Start chatting with the virtual patient..."):
     st.session_state.messages.append({"role": "user", "content": prompt})
     st.chat_message("user").markdown(prompt)
-    
+
     # Send message to OpenAI Assistant
     openai.beta.threads.messages.create(
         thread_id=st.session_state.thread_id,
         role="user",
         content=prompt,
     )
-    
     run = openai.beta.threads.runs.create(
         thread_id=st.session_state.thread_id,
         assistant_id=assistant_id,
     )
-    
+
     # Wait for assistant to finish
     with st.spinner("Waiting for response..."):
         while True:
@@ -103,56 +103,55 @@ if prompt := st.chat_input("Start chatting with the virtual patient..."):
             )
             if run_status.status == "completed":
                 break
-    
+
     # Get the latest response
     messages = openai.beta.threads.messages.list(thread_id=st.session_state.thread_id)
     latest = messages.data[0].content[0].text.value
     st.session_state.messages.append({"role": "assistant", "content": latest})
     st.chat_message("assistant").markdown(latest)
 
-# Only show button if there's a user message in the history
-# Count how many user messages exist
+# Only show feedback button after at least 5 user turns
 user_message_count = sum(1 for msg in st.session_state.messages if msg["role"] == "user")
 
 if user_message_count >= 5:
     st.markdown("---")
     st.subheader("🧠 Ready to end the interview and get feedback?")
-    
+
     if st.button("Generate Feedback!"):
-        # Get the appropriate feedback assistant for the selected actor
         feedback_assistant_key = get_feedback_assistant_key(st.session_state.selected_actor)
         patient_name = get_patient_name(st.session_state.selected_actor)
-        
-        # Check if the feedback assistant exists
+
         if feedback_assistant_key not in FEEDBACK_ASSISTANTS:
-            st.error(f"Feedback assistant '{feedback_assistant_key}' not found. Please check your feedback_assistants configuration.")
+            st.error(f"Feedback assistant '{feedback_assistant_key}' not found.")
             st.stop()
-        
+
         assistant_id_to_use = FEEDBACK_ASSISTANTS[feedback_assistant_key]
         transcript = get_transcript_as_text(st.session_state.thread_id)
-        
-        # Generate Overall Feedback
+
         # Create new thread for feedback
         feedback_thread = openai.beta.threads.create()
-        
-        # Feedback prompt
+        openai.beta.threads.messages.create(
+            thread_id=feedback_thread.id,
+            role="system",
+            content="You are an expert clinical skills rater. Use the five-domain assessment framework."
+        )
         openai.beta.threads.messages.create(
             thread_id=feedback_thread.id,
             role="user",
             content=f"""
-Below is a transcript of a student's chat with virtual standardized patient {patient_name}. Please evaluate the student's performance using the five-domain assessment framework.
+Below is a transcript of a student's chat with virtual standardized patient {patient_name}.
+Please evaluate the student's performance using the five-domain assessment framework.
 
 Transcript:
 {transcript}
 """
         )
-        
-        # Use the main feedback assistant
+
         feedback_run = openai.beta.threads.runs.create(
             thread_id=feedback_thread.id,
             assistant_id=assistant_id_to_use,
         )
-        
+
         with st.spinner("Generating comprehensive feedback..."):
             while True:
                 feedback_status = openai.beta.threads.runs.retrieve(
@@ -162,13 +161,24 @@ Transcript:
                 if feedback_status.status == "completed":
                     break
                 elif feedback_status.status in ["failed", "cancelled", "expired"]:
-                    st.error(f"Feedback generation failed. Please try again.")
+                    st.error("Feedback generation failed. Please try again.")
                     st.stop()
-        
-        feedback_messages = openai.beta.threads.messages.list(thread_id=feedback_thread.id)
-        feedback_text = feedback_messages.data[0].content[0].text.value
-        
-        # Display Overall Feedback Section
+
+        # Fetch the full feedback reply
+        feedback_messages = openai.beta.threads.messages.list(
+            thread_id=feedback_thread.id,
+            page_size=100
+        )
+        assistant_replies = [
+            m for m in feedback_messages.data
+            if m.role == "assistant"
+        ]
+        if not assistant_replies:
+            st.error("No assistant reply found in feedback thread.")
+            st.stop()
+        feedback_text = assistant_replies[-1].content[0].text.value
+
+        # Display Overall Feedback
         st.subheader("📋 Comprehensive Feedback")
         st.markdown(f"*Feedback from {patient_name} encounter*")
         st.markdown(feedback_text)
