@@ -2,6 +2,7 @@ import streamlit as st
 import openai
 from assistants import ASSISTANT_MAP
 from feedback_assistants import FEEDBACK_ASSISTANTS
+from patient_prompts import get_patient_prompt
 import time
 
 # Configuration
@@ -254,6 +255,18 @@ Transcript of the student's chat with virtual standardized patient {patient_name
         # Show which patient we're talking to
         patient_name = self.get_patient_name(selected_actor)
         st.subheader(f"💬 Conversation with {patient_name}")
+        
+        # Display patient intro prompt
+        patient_prompt = get_patient_prompt(patient_name)
+        if patient_prompt:
+            with st.expander("📋 Case Introduction - Click to read", expanded=True):
+                st.markdown(f"<div style='background-color: #f0f2f6; padding: 15px; border-radius: 10px; border-left: 4px solid #1f77b4;'>{patient_prompt}</div>", 
+                           unsafe_allow_html=True)
+        else:
+            st.info(f"Starting conversation with {patient_name}")
+        
+        # Add some spacing
+        st.markdown("---")
         
         # Display chat history
         self.display_chat_history()
