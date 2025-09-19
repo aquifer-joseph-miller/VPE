@@ -27,8 +27,7 @@ class VPEApp:
             st.session_state.messages = []
         if "thread_id" not in st.session_state:
             st.session_state.thread_id = self.create_thread()
-        if "selected_actor" not in st.session_state:
-            st.session_state.selected_actor = None
+        # Don't set selected_actor to None - let it be unset initially
     
     def create_thread(self):
         """Create a new OpenAI thread and return its ID."""
@@ -41,10 +40,20 @@ class VPEApp:
     
     def reset_conversation_if_needed(self, current_actor):
         """Reset conversation if actor has changed."""
-        if st.session_state.selected_actor != current_actor:
+        # Get the previously selected actor (None if not set)
+        previous_actor = st.session_state.get('selected_actor', None)
+        
+        # If this is a new selection, reset everything
+        if previous_actor != current_actor:
             st.session_state.selected_actor = current_actor
             st.session_state.messages = []
             st.session_state.thread_id = self.create_thread()
+            
+            # Optional: Show confirmation message
+            if previous_actor is not None:  # Not the first load
+                patient_name = self.get_patient_name(current_actor)
+                st.sidebar.info(f"🔄 Switched to {patient_name}")
+                st.rerun()
     
     def get_patient_name(self, actor_name):
         """Extract patient name from actor selection."""
@@ -233,13 +242,18 @@ Transcript of the student's chat with virtual standardized patient {patient_name
         
         selected_actor = st.sidebar.selectbox(
             "Choose a Virtual Patient Encounter",
-            list(ASSISTANT_MAP.keys())
+            list(ASSISTANT_MAP.keys()),
+            key="actor_selector"
         )
         
         assistant_id = ASSISTANT_MAP[selected_actor]
         
         # Reset conversation if actor changed
         self.reset_conversation_if_needed(selected_actor)
+        
+        # Show which patient we're talking to
+        patient_name = self.get_patient_name(selected_actor)
+        st.subheader(f"💬 Conversation with {patient_name}")
         
         # Display chat history
         self.display_chat_history()
