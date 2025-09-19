@@ -17,7 +17,7 @@ Your preceptor instructs you to conduct a history of present illness, review of 
 
 Some responses may take longer than others, so please be patient with Mr. Smitherman. If he appears to get stuck, simply ask another question.
 
-Your preceptor instructs you to conduct a focused history of present illness, relevant review of systems, and appropriate social history for this follow-up visit. You enter the clinic exam room where Mr. Smitherman, an active and independent 87-year-old, is seated on the examination table. He greets you with a warm smile but shifts uncomfortably, placing his hand on his lower back. His wife is seated in the chair beside him.""",
+Your preceptor instructs you to conduct a focused history of present illness, relevant review of systems, and appropriate social history for this follow-up visit. You enter the clinic exam room where Mr. Smitherman, an active and independent 87-year-old, is seated on the examination table. He greets you with a warm smile but shifts uncomfortably.""",
 
     "Jessica Morales": """You are about to begin an interview with Ms. Jessica Morales, an AI-powered virtual patient. Please approach this conversation as you would with a real patient: ask appropriate questions to gather the clinical information you need to make decisions. You must ask at least five questions before proceeding in the case. After that, the "I don't have any more questions" button will become available--but you should only click it when you believe you've gathered enough information to move forward.
 
