@@ -25,7 +25,7 @@ ASSISTANT_MAP = {
     "Dolores Russell (Gynecology 03)": "asst_VKdsqSCQ20QUGZvRvIqjEYZQ",
     
     # Psychiatry
-    "Allison Kirkpatrick (Psychiatry 05)": "asst_pXcWTnltp76KLKw6KyaAGCjw",
+    "Allison Killpatrick (Psychiatry 05)": "asst_pXcWTnltp76KLKw6KyaAGCjw",
     
     # Palliative Care
     "Erica Patterson (Palliative Care 06)": "asst_jKKOCPvspxa9g2qo8GCVvswu",

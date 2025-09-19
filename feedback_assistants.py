@@ -5,15 +5,15 @@ FEEDBACK_ASSISTANTS = {
     "Mr. Aiken Feedback": "asst_DeDFNDKqaeoNaBC68j5QaBH3",
     "Mrs. Kelly Feedback": "asst_VDMoRCzxDWfqiJnx4rGkOlE7",
     
-    # Using consistent naming (fixed: Lori instead of Lois)
+    # Using consistent naming 
     "Albert Smitherman Feedback": "asst_VDMoRCzxDWfqiJnx4rGkOlE7",
     "Jessica Morales Feedback": "asst_VDMoRCzxDWfqiJnx4rGkOlE7",
     "Amanda Waters Feedback": "asst_VDMoRCzxDWfqiJnx4rGkOlE7",
     "Barbara Turner Feedback": "asst_VDMoRCzxDWfqiJnx4rGkOlE7",
     "Anna Pine Feedback": "asst_VDMoRCzxDWfqiJnx4rGkOlE7",
-    "Lori Johnson Feedback": "asst_VDMoRCzxDWfqiJnx4rGkOlE7",  # Fixed: was "Lois"
+    "Lori Johnson Feedback": "asst_VDMoRCzxDWfqiJnx4rGkOlE7", 
     "Dolores Russell Feedback": "asst_VDMoRCzxDWfqiJnx4rGkOlE7",
-    "Allison Kirkpatrick Feedback": "asst_VDMoRCzxDWfqiJnx4rGkOlE7",
+    "Allison Killpatrick Feedback": "asst_VDMoRCzxDWfqiJnx4rGkOlE7",
     "Erica Patterson Feedback": "asst_VDMoRCzxDWfqiJnx4rGkOlE7",
 }
 

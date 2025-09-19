@@ -7,7 +7,9 @@ import time
 
 # Configuration
 MIN_MESSAGES_FOR_FEEDBACK = 5
-POLLING_INTERVAL = 1  # seconds
+POLLING_INTERVAL = 2  # seconds - increased to reduce API calls
+FEEDBACK_TIMEOUT = 180  # 3 minutes for feedback generation
+CHAT_TIMEOUT = 90  # 90 seconds for regular chat
 
 class VPEApp:
     def __init__(self):
@@ -20,6 +22,9 @@ class VPEApp:
             openai.api_key = st.secrets["OPENAI_API_KEY"]
         except KeyError:
             st.error("OpenAI API key not found in secrets. Please configure OPENAI_API_KEY.")
+            st.stop()
+        except Exception as e:
+            st.error(f"Error setting up OpenAI: {e}")
             st.stop()
     
     def init_session_state(self):
@@ -99,8 +104,8 @@ class VPEApp:
             st.error(f"Failed to retrieve transcript: {e}")
             return ""
     
-    def wait_for_run_completion(self, thread_id, run_id, timeout=60):
-        """Wait for OpenAI run to complete with timeout."""
+    def wait_for_run_completion(self, thread_id, run_id, timeout=60, operation="operation"):
+        """Wait for OpenAI run to complete with timeout (simple version)."""
         start_time = time.time()
         
         while time.time() - start_time < timeout:
@@ -113,15 +118,65 @@ class VPEApp:
                 if run_status.status == "completed":
                     return True
                 elif run_status.status in ("failed", "cancelled", "expired"):
-                    st.error(f"Run failed with status: {run_status.status}")
+                    st.error(f"{operation.title()} failed with status: {run_status.status}")
+                    if hasattr(run_status, 'last_error') and run_status.last_error:
+                        st.error(f"Error details: {run_status.last_error}")
+                    return False
+                elif run_status.status == "requires_action":
+                    st.error(f"{operation.title()} requires action. This shouldn't happen with these assistants.")
                     return False
                 
                 time.sleep(POLLING_INTERVAL)
             except Exception as e:
-                st.error(f"Error checking run status: {e}")
+                st.error(f"Error checking {operation} status: {e}")
                 return False
         
-        st.error("Request timed out. Please try again.")
+        st.error(f"{operation.title()} timed out after {timeout} seconds. Please try again.")
+        return False
+
+    def wait_for_run_completion_with_progress(self, thread_id, run_id, timeout=60, operation="operation"):
+        """Wait for OpenAI run to complete with progress updates."""
+        start_time = time.time()
+        progress_placeholder = st.empty()
+        
+        while time.time() - start_time < timeout:
+            elapsed = int(time.time() - start_time)
+            progress_placeholder.info(f"⏱️ {operation.title()} in progress... {elapsed}s elapsed")
+            
+            try:
+                run_status = openai.beta.threads.runs.retrieve(
+                    thread_id=thread_id,
+                    run_id=run_id
+                )
+                
+                if run_status.status == "completed":
+                    progress_placeholder.empty()
+                    return True
+                elif run_status.status in ("failed", "cancelled", "expired"):
+                    progress_placeholder.empty()
+                    st.error(f"{operation.title()} failed with status: {run_status.status}")
+                    if hasattr(run_status, 'last_error') and run_status.last_error:
+                        st.error(f"Error details: {run_status.last_error}")
+                    return False
+                elif run_status.status == "requires_action":
+                    progress_placeholder.empty()
+                    st.error(f"{operation.title()} requires action. This shouldn't happen with these assistants.")
+                    return False
+                
+                time.sleep(POLLING_INTERVAL)
+            except Exception as e:
+                progress_placeholder.empty()
+                st.error(f"Error checking {operation} status: {e}")
+                return False
+        
+        progress_placeholder.empty()
+        st.error(f"⏰ {operation.title()} timed out after {timeout} seconds.")
+        st.info("""
+        **What you can try:**
+        - Click the 'Generate Feedback!' button again to retry
+        - Check your internet connection
+        - If this persists, the OpenAI servers may be experiencing high load
+        """)
         return False
     
     def send_message_to_patient(self, prompt, assistant_id):
@@ -142,7 +197,8 @@ class VPEApp:
             
             # Wait for completion
             with st.spinner("Waiting for response..."):
-                if not self.wait_for_run_completion(st.session_state.thread_id, run.id):
+                if not self.wait_for_run_completion(st.session_state.thread_id, run.id, 
+                                                  timeout=CHAT_TIMEOUT, operation="chat response"):
                     return None
             
             # Get latest response
@@ -200,9 +256,10 @@ Transcript of the student's chat with virtual standardized patient {patient_name
             )
             
             # Wait for feedback completion
-            with st.spinner("Generating comprehensive feedback..."):
-                if not self.wait_for_run_completion(feedback_thread.id, feedback_run.id):
-                    return
+            if not self.wait_for_run_completion_with_progress(feedback_thread.id, feedback_run.id, 
+                                                            timeout=FEEDBACK_TIMEOUT, 
+                                                            operation="feedback generation"):
+                return
             
             # Get feedback
             feedback_messages = openai.beta.threads.messages.list(
@@ -291,8 +348,9 @@ Transcript of the student's chat with virtual standardized patient {patient_name
             st.markdown("---")
             st.subheader("🧠 Ready to end the interview and get feedback?")
             
-            if st.button("Generate Feedback!"):
-                self.generate_feedback(selected_actor)
+            if st.button("Generate Feedback!", type="primary"):
+                with st.spinner("Preparing feedback generation..."):
+                    self.generate_feedback(selected_actor)
 
 # Run the application
 if __name__ == "__main__":

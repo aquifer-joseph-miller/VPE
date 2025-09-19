@@ -55,11 +55,11 @@ Some responses may take longer than others, so please be patient with Ms. Russel
 
 Ms. Walker instructs you to conduct a thorough history of present illness and relevant review of systems for her chief complaint of pelvic pain. You enter the exam room where Ms. Russell, a 31-year-old new patient, is seated and ready to discuss her concerns.""",
 
-    "Allison Kirkpatrick": """You are about to begin an interview with Ms. Allison Kirkpatrick, an AI-powered virtual patient. Please approach this conversation as you would with a real patient: ask appropriate questions to gather the clinical information you need to make decisions. You must ask at least five questions before proceeding in the case. After that, the "I don't have any more questions" button will become available--but you should only click it when you believe you've gathered enough information to move forward.
+    "Allison Killpatrick": """You are about to begin an interview with Ms. Allison Killpatrick, an AI-powered virtual patient. Please approach this conversation as you would with a real patient: ask appropriate questions to gather the clinical information you need to make decisions. You must ask at least five questions before proceeding in the case. After that, the "I don't have any more questions" button will become available--but you should only click it when you believe you've gathered enough information to move forward.
 
-Some responses may take longer than others, so please be patient with Ms. Kirkpatrick. If she appears to get stuck, simply ask another question.
+Some responses may take longer than others, so please be patient with Ms. Killpatrick. If she appears to get stuck, simply ask another question.
 
-Dr. Williams instructs you to conduct a thorough psychiatric intake interview focusing on her presenting concerns of anxiety and relationship difficulties. You enter the room where Ms. Kirkpatrick, a 29-year-old seeking help for the first time, sits alone looking visibly nervous about this initial psychiatry appointment.""",
+Dr. Williams instructs you to conduct a thorough psychiatric intake interview focusing on her presenting concerns of anxiety and relationship difficulties. You enter the room where Ms. Killpatrick, a 29-year-old seeking help for the first time, sits alone looking visibly nervous about this initial psychiatry appointment.""",
 
     "Erica Patterson": """You are about to begin an interview with Ms. Erica Patterson, an AI-powered virtual patient. Please approach this conversation as you would with a real patient: ask appropriate questions to gather the clinical information you need to make decisions. You must ask at least five questions before proceeding in the case. After that, the "I don't have any more questions" button will become available--but you should only click it when you believe you've gathered enough information to move forward.
 
