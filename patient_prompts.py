@@ -65,7 +65,7 @@ Dr. Williams instructs you to conduct a thorough psychiatric intake interview fo
 
 Some responses may take longer than others, so please be patient with Ms. Patterson. If she appears to get stuck, simply ask another question.
 
-Dr. Jennings instructs you to conduct a comprehensive pain assessment for this palliative medicine consultation. You enter the exam room where Ms. Patterson, a 35-year-old with a recent diagnosis of metastatic breast cancer to T6, is seated. She was referred for persistent back pain management after transitioning from ibuprofen to tramadol."""
+Dr. Jennings instructs you to conduct a comprehensive pain assessment for this palliative medicine consultation. You enter the exam room where Ms. Patterson, a 35-year-old with a recent diagnosis of metastatic breast cancer to T6, is seated. She was referred for persistent back pain management."""
 }
 
 def get_patient_prompt(patient_name):
