@@ -1,13 +1,42 @@
 # feedback_assistants.py
+
 FEEDBACK_ASSISTANTS = {
+    # Main feedback assistants (organized by patient name)
     "Mr. Aiken Feedback": "asst_DeDFNDKqaeoNaBC68j5QaBH3",
-    "Mr. Aiken Feedback - Breadth": "asst_YsVDnU2LzQGRrym8cUKj1ZI5",
-    "Mr. Smith Feedback": "asst_mfGdc7BVIVo6PSTQf6EicNiy", 
-    "Mr. Smith Feedback - Breadth": "asst_mfGdc7BVIVo6PSTQf6EicNiy",
     "Mrs. Kelly Feedback": "asst_VDMoRCzxDWfqiJnx4rGkOlE7",
-    "Mrs. Kelly Feedback - Breadth": "asst_PYgRyEEVRohlODq2ENxmQnRw",
-    "Depth Feedback": "asst_pG7EXYO2ajB7ZXx2NtNB7Sef", 
-    "Relevance Feedback": "asst_pYiPS8q7gSmEXw07wgZy8x2T",
-    "Questioning Mix Feedback": "asst_exFefvDw3uWgRzhc9b5WNalJ", 
-    "Patient Interaction Feedback": "asst_s8F3SHRjSq4EyqZJGp3TpJ8x"
+    
+    # Using consistent naming (fixed: Lori instead of Lois)
+    "Albert Smitherman Feedback": "asst_VDMoRCzxDWfqiJnx4rGkOlE7",
+    "Jessica Morales Feedback": "asst_VDMoRCzxDWfqiJnx4rGkOlE7",
+    "Amanda Waters Feedback": "asst_VDMoRCzxDWfqiJnx4rGkOlE7",
+    "Barbara Turner Feedback": "asst_VDMoRCzxDWfqiJnx4rGkOlE7",
+    "Anna Pine Feedback": "asst_VDMoRCzxDWfqiJnx4rGkOlE7",
+    "Lori Johnson Feedback": "asst_VDMoRCzxDWfqiJnx4rGkOlE7",  # Fixed: was "Lois"
+    "Dolores Russell Feedback": "asst_VDMoRCzxDWfqiJnx4rGkOlE7",
+    "Allison Kirkpatrick Feedback": "asst_VDMoRCzxDWfqiJnx4rGkOlE7",
+    "Erica Patterson Feedback": "asst_VDMoRCzxDWfqiJnx4rGkOlE7",
 }
+
+# Helper function to get feedback assistant ID
+def get_feedback_assistant_id(patient_name):
+    """
+    Get feedback assistant ID by patient name.
+    
+    Args:
+        patient_name (str): The name of the patient
+        
+    Returns:
+        str: The feedback assistant ID, or None if not found
+    """
+    feedback_key = f"{patient_name} Feedback"
+    return FEEDBACK_ASSISTANTS.get(feedback_key)
+
+# Get all available feedback assistants
+def get_available_feedback_assistants():
+    """
+    Get a list of all available feedback assistant names.
+    
+    Returns:
+        list: List of feedback assistant keys
+    """
+    return list(FEEDBACK_ASSISTANTS.keys())
