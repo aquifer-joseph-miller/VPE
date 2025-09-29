@@ -65,7 +65,13 @@ Dr. Williams instructs you to conduct a thorough psychiatric intake interview fo
 
 Some responses may take longer than others, so please be patient with Ms. Patterson. If she appears to get stuck, simply ask another question.
 
-Dr. Jennings instructs you to conduct a comprehensive pain assessment for this palliative medicine consultation. You enter the exam room where Ms. Patterson, a 35-year-old with a recent diagnosis of metastatic breast cancer to T6, is seated. She was referred for persistent back pain management."""
+Dr. Jennings instructs you to conduct a comprehensive pain assessment for this palliative medicine consultation. You enter the exam room where Ms. Patterson, a 35-year-old with a recent diagnosis of metastatic breast cancer to T6, is seated. She was referred for persistent back pain management.""",
+
+    "Mrs. Miller": """You are about to begin using the teach-back method with Mrs. Miller, an AI-powered virtual patient. Please approach this conversation as you would with a real patient: deploy the teach-back technique. You must have at least five interactions before proceeding in the case. After that, the "I don't have any more questions" button will become available--but you should only click it when you believe you've finished.
+
+Some responses may take longer than others, so please be patient with Ms. Patterson. If she appears to get stuck, simply ask another question.
+
+You begin doing a pre-discharge teach-back of Mrs. Miller discharge plans. You enter the room where Mrs. Miller, an 80-year-old preparing for discharge awaits with her daughter."""
 }
 
 def get_patient_prompt(patient_name):

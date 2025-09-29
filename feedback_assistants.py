@@ -3,9 +3,7 @@
 FEEDBACK_ASSISTANTS = {
     # Main feedback assistants (organized by patient name)
     "Mr. Aiken Feedback": "asst_DeDFNDKqaeoNaBC68j5QaBH3",
-    "Mrs. Kelly Feedback": "asst_VDMoRCzxDWfqiJnx4rGkOlE7",
-    
-    # Using consistent naming 
+    "Mrs. Kelly Feedback": "asst_VDMoRCzxDWfqiJnx4rGkOlE7",      
     "Albert Smitherman Feedback": "asst_VDMoRCzxDWfqiJnx4rGkOlE7",
     "Jessica Morales Feedback": "asst_VDMoRCzxDWfqiJnx4rGkOlE7",
     "Amanda Waters Feedback": "asst_VDMoRCzxDWfqiJnx4rGkOlE7",
@@ -15,6 +13,7 @@ FEEDBACK_ASSISTANTS = {
     "Dolores Russell Feedback": "asst_VDMoRCzxDWfqiJnx4rGkOlE7",
     "Allison Killpatrick Feedback": "asst_VDMoRCzxDWfqiJnx4rGkOlE7",
     "Erica Patterson Feedback": "asst_VDMoRCzxDWfqiJnx4rGkOlE7",
+    "Mrs. Miller Feedback": "asst_J2yNXKyAVxZ9yhxVD1o4roNh",
 }
 
 # Helper function to get feedback assistant ID

@@ -1,8 +1,7 @@
 # assistants.py
 
 ASSISTANT_MAP = {
-    # Organized by specialty for better maintainability
-    
+   
     # Geriatrics
     "Mr. Aiken (Geriatrics 15)": "asst_QvmAr0EQSkJbTz1egONsWRBy",
     "Albert Smitherman (Geriatrics 16)": "asst_kAbDyyAv4noyXhEUTIVultmv",
@@ -29,6 +28,9 @@ ASSISTANT_MAP = {
     
     # Palliative Care
     "Erica Patterson (Palliative Care 06)": "asst_jKKOCPvspxa9g2qo8GCVvswu",
+
+    # Highh Value Care
+    "Mrs. Miller (High Value Care 04)": "asst_pWDA8oyZfpvRGWyYDoWhakj1",
 }
 
 # Helper function to get assistant by name or ID
