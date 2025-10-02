@@ -313,12 +313,21 @@ Transcript of the student's chat with virtual standardized patient {patient_name
         patient_name = self.get_patient_name(selected_actor)
         st.subheader(f"💬 Conversation with {patient_name}")
         
-        # Display patient intro prompt
+        # Display patient intro prompt - FIXED FOR DARK MODE
         patient_prompt = get_patient_prompt(patient_name)
         if patient_prompt:
             with st.expander("📋 Case Introduction - Click to read", expanded=True):
-                st.markdown(f"<div style='background-color: #f0f2f6; padding: 15px; border-radius: 10px; border-left: 4px solid #1f77b4;'>{patient_prompt}</div>", 
-                           unsafe_allow_html=True)
+                st.markdown(f"""
+                <div style='
+                    padding: 15px; 
+                    border-radius: 10px; 
+                    border-left: 4px solid #1f77b4;
+                    background-color: var(--secondary-background-color);
+                    color: var(--text-color);
+                '>
+                    {patient_prompt}
+                </div>
+                """, unsafe_allow_html=True)
         else:
             st.info(f"Starting conversation with {patient_name}")
         
