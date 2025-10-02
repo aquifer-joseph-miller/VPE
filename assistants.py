@@ -8,7 +8,7 @@ ASSISTANT_MAP = {
     
     # Pediatrics
     "Mrs. Kelly (Pediatrics 12)": "asst_YFt8DwxTNaNIb167RidYEvQR",
-    "Jessica Morales (Pediatrics 09)": "asst_HsHZ5S1NHLJiEgyMV5cCakiX",
+    "Jessica Morales (Pediatrics 09)": "asst_KJHLtj7XmArrsaiNOUA225i3",
     
     # Family Medicine
     "Amanda Waters (Family Medicine 05)": "asst_HsHZ5S1NHLJiEgyMV5cCakiX",
@@ -29,7 +29,7 @@ ASSISTANT_MAP = {
     # Palliative Care
     "Erica Patterson (Palliative Care 06)": "asst_jKKOCPvspxa9g2qo8GCVvswu",
 
-    # Highh Value Care
+    # High Value Care
     "Mrs. Miller (High Value Care 04)": "asst_pWDA8oyZfpvRGWyYDoWhakj1",
 }
 
