@@ -3,8 +3,9 @@
 FEEDBACK_ASSISTANTS = {
     # Main feedback assistants (organized by patient name)
     "Mr. Aiken Feedback": "asst_DeDFNDKqaeoNaBC68j5QaBH3",
-    "Mrs. Kelly Feedback": "asst_VDMoRCzxDWfqiJnx4rGkOlE7",      
+    "Mrs. Kelly Feedback": "asst_VDMoRCzxDWfqiJnx4rGkOlE7",
     "Albert Smitherman Feedback": "asst_trOKTbhafy3dEWgU7X53zfsv",
+    "Mrs. Ada Street Feedback": "asst_P3RDnVT2LEmLnpB90P0bVkgP",
     "Jessica Morales Feedback": "asst_mYV3rAu4QzniUKTPwpetjsZy",
     "Amanda Waters Feedback": "asst_0qnP7dAL045D07pAdyI7fMwq",
     "Barbara Turner Feedback": "asst_RpoQyL8MuMcAFLgaMUyOZHuk",
