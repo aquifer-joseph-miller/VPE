@@ -10,6 +10,7 @@ ASSISTANT_MAP = {
     # Pediatrics
     "Mrs. Kelly (Pediatrics 12)": "asst_YFt8DwxTNaNIb167RidYEvQR",
     "Jessica Morales (Pediatrics 09)": "asst_KJHLtj7XmArrsaiNOUA225i3",
+    "Betsy Pearce (Pediatrics 5)": "asst_eIOuYGVZFXlKLStvfUtn2dN6",
     
     # Family Medicine
     "Amanda Waters (Family Medicine 05)": "asst_HsHZ5S1NHLJiEgyMV5cCakiX",

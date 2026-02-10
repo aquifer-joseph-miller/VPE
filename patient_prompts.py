@@ -25,6 +25,12 @@ Some responses may take longer than others, so please be patient with Mrs. Stree
 
 Your preceptor instructs you to conduct a thorough history of present illness, relevant review of systems, and appropriate social history for her chief complaint of bladder problems. You enter the clinic exam room where Mrs. Ada Street is seated, ready to discuss her concerns.""",
 
+    "Betsy Pearce": """You are about to begin an interview with Betsy Pearce, a 16-year-old AI-powered virtual patient. Please approach this conversation as you would with a real patient: ask appropriate questions to gather the clinical information you need to make decisions. You must ask at least five questions before proceeding in the case. After that, the "I don't have any more questions" button will become available--but you should only click it when you believe you've gathered enough information to move forward.
+
+Some responses may take longer than others, so please be patient with Betsy. If she appears to get stuck, simply ask another question.
+
+You are about to meet Betsy, a 16-year-old who has come to the outpatient pediatric clinic in November for a checkup. Your preceptor, Dr. Blake, suggests that you start the interview with Betsy and her mother alone. You will then do the physical examination together. Dr. Blake reminds you not to forget the HEEADSSS interview! Before you enter the clinic room, you and Dr. Blake meet Mrs. Pearce, who is going back to work. She voices some concerns about Betsy: Mother reports Betsy is less active, fatigued, not doing as well as usual in school, paler than usual. Mother is concerned about possible depression. You enter the examining room and introduce yourself to Betsy: "Hi, Betsy, I'm a medical student working with Dr. Blake. She has asked me to start your office visit, and then she will join us."""",
+
     "Jessica Morales": """You are about to begin an interview with Ms. Jessica Morales, an AI-powered virtual patient. Please approach this conversation as you would with a real patient: ask appropriate questions to gather the clinical information you need to make decisions. You must ask at least five questions before proceeding in the case. After that, the "I don't have any more questions" button will become available--but you should only click it when you believe you've gathered enough information to move forward.
 
 Some responses may take longer than others, so please be patient with Ms. Morales. If she appears to get stuck, simply ask another question.
