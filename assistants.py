@@ -5,7 +5,7 @@ ASSISTANT_MAP = {
     # Geriatrics
     "Mr. Aiken (Geriatrics 15)": "asst_QvmAr0EQSkJbTz1egONsWRBy",
     "Albert Smitherman (Geriatrics 16)": "asst_kAbDyyAv4noyXhEUTIVultmv",
-    "Mrs. Ada Street (Geriatrics 17)": "asst_8yBlHaT60YdtsPjjrgliijud",
+    "Mrs. Ada Street (Geriatrics 3)": "asst_8yBlHaT60YdtsPjjrgliijud",
     
     # Pediatrics
     "Mrs. Kelly (Pediatrics 12)": "asst_YFt8DwxTNaNIb167RidYEvQR",
