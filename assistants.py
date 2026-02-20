@@ -14,6 +14,7 @@ ASSISTANT_MAP = {
     
     # Family Medicine
     "Amanda Waters (Family Medicine 05)": "asst_HsHZ5S1NHLJiEgyMV5cCakiX",
+    "Chantel Newman (Family Medicine 23)": "asst_0Gl924yDVZFy0xBLNWYhgYe2",
     
     # Internal Medicine
     "Barbara Turner (Internal Medicine 09)": "asst_rULWJq6yptdIKcdZ0jc4Toxt",
