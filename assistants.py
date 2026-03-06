@@ -17,6 +17,7 @@ ASSISTANT_MAP = {
     "Chantel Newman (Family Medicine 23)": "asst_0Gl924yDVZFy0xBLNWYhgYe2",
     
     # Internal Medicine
+    "Steve Monson (Internal Medicine 01)": "asst_5y2Hyiwb15gMm2msXHy9j26R",
     "Barbara Turner (Internal Medicine 09)": "asst_rULWJq6yptdIKcdZ0jc4Toxt",
     
     # Neurology
