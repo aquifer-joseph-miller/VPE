@@ -22,12 +22,14 @@ ASSISTANT_MAP = {
     
     # Neurology
     "Anna Pine (Neurology 11)": "asst_fJKBggzYCVeAkVdw1pxLq20c",
+    "Miriam Salaah (Neurology 13)": "asst_rZ8Bll5RGcEFxaSzbZ3NIGOc",
     
     # Gynecology
     "Lori Johnson (Gynecology 02)": "asst_AACL3cOVfAs5q6FLrGbNhhii",
     "Dolores Russell (Gynecology 03)": "asst_VKdsqSCQ20QUGZvRvIqjEYZQ",
     
     # Psychiatry
+    "Kenny Johnson (Psychiatry 3)": "asst_DqcruqwvENmrvgZVTw3rQo2d",
     "Allison Killpatrick (Psychiatry 05)": "asst_pXcWTnltp76KLKw6KyaAGCjw",
     
     # Palliative Care
